@@ -1,0 +1,263 @@
+2023-11-27 07:16:56,689:INFO:Epoch 1/10
+2023-11-27 07:16:56,690:INFO:Training Loss: 0.2062
+2023-11-27 07:16:56,690:INFO:Validation Loss: 3.7910
+2023-11-27 07:16:56,690:INFO:Cardiomegaly Validation Accuracy: 32.22%
+2023-11-27 07:16:56,690:INFO:Edema Validation Accuracy: 40.00%
+2023-11-27 07:16:56,690:INFO:Consolidation Validation Accuracy: 32.22%
+2023-11-27 07:16:56,690:INFO:Atelectasis Validation Accuracy: 46.67%
+2023-11-27 07:16:56,690:INFO:Pleural Effusion Validation Accuracy: 65.56%
+2023-11-27 07:18:09,274:INFO:Internal process exited
+2023-11-27 07:39:21,271:INFO:Epoch 1/10
+2023-11-27 07:39:21,291:INFO:Training Loss: 0.1907
+2023-11-27 07:39:21,291:INFO:Validation Loss: 3.7855
+2023-11-27 07:39:21,291:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 07:39:21,292:INFO:Edema Validation Accuracy: 23.33%
+2023-11-27 07:39:21,292:INFO:Consolidation Validation Accuracy: 68.89%
+2023-11-27 07:39:21,292:INFO:Atelectasis Validation Accuracy: 47.78%
+2023-11-27 07:39:21,292:INFO:Pleural Effusion Validation Accuracy: 47.78%
+2023-11-27 07:45:56,226:INFO:Epoch 2/10
+2023-11-27 07:45:56,239:INFO:Training Loss: 0.1908
+2023-11-27 07:45:56,239:INFO:Validation Loss: 3.7472
+2023-11-27 07:45:56,239:INFO:Cardiomegaly Validation Accuracy: 51.11%
+2023-11-27 07:45:56,239:INFO:Edema Validation Accuracy: 23.33%
+2023-11-27 07:45:56,240:INFO:Consolidation Validation Accuracy: 67.78%
+2023-11-27 07:45:56,240:INFO:Atelectasis Validation Accuracy: 50.00%
+2023-11-27 07:45:56,240:INFO:Pleural Effusion Validation Accuracy: 50.00%
+2023-11-27 07:53:19,346:INFO:Epoch 3/10
+2023-11-27 07:53:19,366:INFO:Training Loss: 0.1900
+2023-11-27 07:53:19,366:INFO:Validation Loss: 3.8554
+2023-11-27 07:53:19,366:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 07:53:19,366:INFO:Edema Validation Accuracy: 18.89%
+2023-11-27 07:53:19,366:INFO:Consolidation Validation Accuracy: 67.78%
+2023-11-27 07:53:19,366:INFO:Atelectasis Validation Accuracy: 45.56%
+2023-11-27 07:53:19,366:INFO:Pleural Effusion Validation Accuracy: 45.56%
+2023-11-27 08:01:24,052:INFO:Epoch 4/10
+2023-11-27 08:01:24,072:INFO:Training Loss: 0.1899
+2023-11-27 08:01:24,072:INFO:Validation Loss: 3.8946
+2023-11-27 08:01:24,072:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 08:01:24,072:INFO:Edema Validation Accuracy: 18.89%
+2023-11-27 08:01:24,072:INFO:Consolidation Validation Accuracy: 66.67%
+2023-11-27 08:01:24,072:INFO:Atelectasis Validation Accuracy: 44.44%
+2023-11-27 08:01:24,072:INFO:Pleural Effusion Validation Accuracy: 43.33%
+2023-11-27 08:08:53,059:INFO:Epoch 5/10
+2023-11-27 08:08:53,072:INFO:Training Loss: 0.1900
+2023-11-27 08:08:53,072:INFO:Validation Loss: 3.8169
+2023-11-27 08:08:53,072:INFO:Cardiomegaly Validation Accuracy: 50.00%
+2023-11-27 08:08:53,072:INFO:Edema Validation Accuracy: 21.11%
+2023-11-27 08:08:53,072:INFO:Consolidation Validation Accuracy: 67.78%
+2023-11-27 08:08:53,072:INFO:Atelectasis Validation Accuracy: 48.89%
+2023-11-27 08:08:53,072:INFO:Pleural Effusion Validation Accuracy: 40.00%
+2023-11-27 08:16:39,240:INFO:Epoch 6/10
+2023-11-27 08:16:39,258:INFO:Training Loss: 0.1898
+2023-11-27 08:16:39,259:INFO:Validation Loss: 3.8685
+2023-11-27 08:16:39,259:INFO:Cardiomegaly Validation Accuracy: 43.33%
+2023-11-27 08:16:39,259:INFO:Edema Validation Accuracy: 18.89%
+2023-11-27 08:16:39,259:INFO:Consolidation Validation Accuracy: 65.56%
+2023-11-27 08:16:39,259:INFO:Atelectasis Validation Accuracy: 48.89%
+2023-11-27 08:16:39,259:INFO:Pleural Effusion Validation Accuracy: 44.44%
+2023-11-27 08:24:12,675:INFO:Epoch 7/10
+2023-11-27 08:24:12,698:INFO:Training Loss: 0.1897
+2023-11-27 08:24:12,698:INFO:Validation Loss: 3.7613
+2023-11-27 08:24:12,698:INFO:Cardiomegaly Validation Accuracy: 43.33%
+2023-11-27 08:24:12,699:INFO:Edema Validation Accuracy: 22.22%
+2023-11-27 08:24:12,699:INFO:Consolidation Validation Accuracy: 65.56%
+2023-11-27 08:24:12,699:INFO:Atelectasis Validation Accuracy: 50.00%
+2023-11-27 08:24:12,699:INFO:Pleural Effusion Validation Accuracy: 44.44%
+2023-11-27 08:31:25,594:INFO:Epoch 8/10
+2023-11-27 08:31:25,611:INFO:Training Loss: 0.1902
+2023-11-27 08:31:25,611:INFO:Validation Loss: 3.7947
+2023-11-27 08:31:25,611:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 08:31:25,611:INFO:Edema Validation Accuracy: 21.11%
+2023-11-27 08:31:25,611:INFO:Consolidation Validation Accuracy: 65.56%
+2023-11-27 08:31:25,611:INFO:Atelectasis Validation Accuracy: 50.00%
+2023-11-27 08:31:25,611:INFO:Pleural Effusion Validation Accuracy: 42.22%
+2023-11-27 08:39:09,574:INFO:Epoch 9/10
+2023-11-27 08:39:09,583:INFO:Training Loss: 0.1907
+2023-11-27 08:39:09,583:INFO:Validation Loss: 3.7991
+2023-11-27 08:39:09,583:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 08:39:09,583:INFO:Edema Validation Accuracy: 24.44%
+2023-11-27 08:39:09,584:INFO:Consolidation Validation Accuracy: 68.89%
+2023-11-27 08:39:09,584:INFO:Atelectasis Validation Accuracy: 47.78%
+2023-11-27 08:39:09,584:INFO:Pleural Effusion Validation Accuracy: 47.78%
+2023-11-27 08:46:22,828:INFO:Epoch 10/10
+2023-11-27 08:46:22,869:INFO:Training Loss: 0.1903
+2023-11-27 08:46:22,869:INFO:Validation Loss: 3.8298
+2023-11-27 08:46:22,869:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 08:46:22,869:INFO:Edema Validation Accuracy: 20.00%
+2023-11-27 08:46:22,869:INFO:Consolidation Validation Accuracy: 64.44%
+2023-11-27 08:46:22,869:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-27 08:46:22,869:INFO:Pleural Effusion Validation Accuracy: 43.33%
+2023-11-27 08:46:22,958:INFO:Internal process exited
+2023-11-27 09:19:42,220:INFO:Epoch 1/10
+2023-11-27 09:19:42,232:INFO:Training Loss: 0.2063
+2023-11-27 09:19:42,232:INFO:Validation Loss: 3.9311
+2023-11-27 09:19:42,232:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 09:19:42,232:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 09:19:42,232:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 09:19:42,232:INFO:Atelectasis Validation Accuracy: 46.67%
+2023-11-27 09:19:42,232:INFO:Pleural Effusion Validation Accuracy: 32.22%
+2023-11-27 09:27:22,149:INFO:Epoch 2/10
+2023-11-27 09:27:22,160:INFO:Training Loss: 0.2057
+2023-11-27 09:27:22,160:INFO:Validation Loss: 3.9578
+2023-11-27 09:27:22,160:INFO:Cardiomegaly Validation Accuracy: 48.89%
+2023-11-27 09:27:22,161:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 09:27:22,161:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 09:27:22,161:INFO:Atelectasis Validation Accuracy: 54.44%
+2023-11-27 09:27:22,161:INFO:Pleural Effusion Validation Accuracy: 32.22%
+2023-11-27 09:34:35,021:INFO:Epoch 3/10
+2023-11-27 09:34:35,038:INFO:Training Loss: 0.2066
+2023-11-27 09:34:35,038:INFO:Validation Loss: 3.9830
+2023-11-27 09:34:35,038:INFO:Cardiomegaly Validation Accuracy: 51.11%
+2023-11-27 09:34:35,038:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 09:34:35,038:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 09:34:35,038:INFO:Atelectasis Validation Accuracy: 52.22%
+2023-11-27 09:34:35,038:INFO:Pleural Effusion Validation Accuracy: 28.89%
+2023-11-27 09:42:19,810:INFO:Epoch 4/10
+2023-11-27 09:42:19,822:INFO:Training Loss: 0.2064
+2023-11-27 09:42:19,822:INFO:Validation Loss: 3.9334
+2023-11-27 09:42:19,822:INFO:Cardiomegaly Validation Accuracy: 47.78%
+2023-11-27 09:42:19,822:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 09:42:19,822:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 09:42:19,823:INFO:Atelectasis Validation Accuracy: 56.67%
+2023-11-27 09:42:19,823:INFO:Pleural Effusion Validation Accuracy: 32.22%
+2023-11-27 09:50:02,492:INFO:Epoch 5/10
+2023-11-27 09:50:02,499:INFO:Training Loss: 0.2052
+2023-11-27 09:50:02,499:INFO:Validation Loss: 4.0477
+2023-11-27 09:50:02,499:INFO:Cardiomegaly Validation Accuracy: 44.44%
+2023-11-27 09:50:02,499:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 09:50:02,500:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 09:50:02,500:INFO:Atelectasis Validation Accuracy: 53.33%
+2023-11-27 09:50:02,500:INFO:Pleural Effusion Validation Accuracy: 30.00%
+2023-11-27 09:58:11,577:INFO:Epoch 6/10
+2023-11-27 09:58:11,585:INFO:Training Loss: 0.2056
+2023-11-27 09:58:11,585:INFO:Validation Loss: 3.9303
+2023-11-27 09:58:11,585:INFO:Cardiomegaly Validation Accuracy: 50.00%
+2023-11-27 09:58:11,585:INFO:Edema Validation Accuracy: 16.67%
+2023-11-27 09:58:11,585:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 09:58:11,585:INFO:Atelectasis Validation Accuracy: 55.56%
+2023-11-27 09:58:11,585:INFO:Pleural Effusion Validation Accuracy: 32.22%
+2023-11-27 10:07:01,404:INFO:Epoch 7/10
+2023-11-27 10:07:01,427:INFO:Training Loss: 0.2059
+2023-11-27 10:07:01,427:INFO:Validation Loss: 3.9432
+2023-11-27 10:07:01,427:INFO:Cardiomegaly Validation Accuracy: 50.00%
+2023-11-27 10:07:01,427:INFO:Edema Validation Accuracy: 16.67%
+2023-11-27 10:07:01,427:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 10:07:01,427:INFO:Atelectasis Validation Accuracy: 53.33%
+2023-11-27 10:07:01,427:INFO:Pleural Effusion Validation Accuracy: 32.22%
+2023-11-27 10:14:35,039:INFO:Epoch 8/10
+2023-11-27 10:14:35,056:INFO:Training Loss: 0.2072
+2023-11-27 10:14:35,056:INFO:Validation Loss: 3.9076
+2023-11-27 10:14:35,056:INFO:Cardiomegaly Validation Accuracy: 48.89%
+2023-11-27 10:14:35,056:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 10:14:35,056:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 10:14:35,056:INFO:Atelectasis Validation Accuracy: 57.78%
+2023-11-27 10:14:35,056:INFO:Pleural Effusion Validation Accuracy: 31.11%
+2023-11-27 10:21:55,351:INFO:Epoch 9/10
+2023-11-27 10:21:55,363:INFO:Training Loss: 0.2060
+2023-11-27 10:21:55,363:INFO:Validation Loss: 3.9205
+2023-11-27 10:21:55,363:INFO:Cardiomegaly Validation Accuracy: 54.44%
+2023-11-27 10:21:55,363:INFO:Edema Validation Accuracy: 16.67%
+2023-11-27 10:21:55,363:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 10:21:55,363:INFO:Atelectasis Validation Accuracy: 55.56%
+2023-11-27 10:21:55,363:INFO:Pleural Effusion Validation Accuracy: 32.22%
+2023-11-27 10:29:44,217:INFO:Epoch 10/10
+2023-11-27 10:29:44,237:INFO:Training Loss: 0.2054
+2023-11-27 10:29:44,237:INFO:Validation Loss: 3.9668
+2023-11-27 10:29:44,237:INFO:Cardiomegaly Validation Accuracy: 56.67%
+2023-11-27 10:29:44,237:INFO:Edema Validation Accuracy: 17.78%
+2023-11-27 10:29:44,237:INFO:Consolidation Validation Accuracy: 71.11%
+2023-11-27 10:29:44,238:INFO:Atelectasis Validation Accuracy: 52.22%
+2023-11-27 10:29:44,238:INFO:Pleural Effusion Validation Accuracy: 30.00%
+2023-11-27 10:29:51,612:INFO:Task Cardiomegaly Accuracy: 45.60%
+2023-11-27 10:29:51,613:INFO:Task Edema Accuracy: 25.00%
+2023-11-27 10:29:51,613:INFO:Task Consolidation Accuracy: 93.40%
+2023-11-27 10:29:51,613:INFO:Task Atelectasis Accuracy: 57.00%
+2023-11-27 10:29:51,613:INFO:Task Pleural Effusion Accuracy: 29.80%
+2023-11-27 10:29:51,623:INFO:Internal process exited
+2023-11-28 03:51:24,103:INFO:Internal process exited
+2023-11-28 04:09:01,370:INFO:Epoch 1/10
+2023-11-28 04:09:01,385:INFO:Training Loss: 0.2215
+2023-11-28 04:09:01,385:INFO:Validation Loss: 3.8349
+2023-11-28 04:09:01,385:INFO:Cardiomegaly Validation Accuracy: 34.44%
+2023-11-28 04:09:01,385:INFO:Edema Validation Accuracy: 36.67%
+2023-11-28 04:09:01,385:INFO:Consolidation Validation Accuracy: 36.67%
+2023-11-28 04:09:01,385:INFO:Atelectasis Validation Accuracy: 48.89%
+2023-11-28 04:09:01,385:INFO:Pleural Effusion Validation Accuracy: 46.67%
+2023-11-28 04:15:52,683:INFO:Epoch 2/10
+2023-11-28 04:15:52,701:INFO:Training Loss: 0.2210
+2023-11-28 04:15:52,701:INFO:Validation Loss: 3.8695
+2023-11-28 04:15:52,701:INFO:Cardiomegaly Validation Accuracy: 36.67%
+2023-11-28 04:15:52,701:INFO:Edema Validation Accuracy: 37.78%
+2023-11-28 04:15:52,701:INFO:Consolidation Validation Accuracy: 33.33%
+2023-11-28 04:15:52,701:INFO:Atelectasis Validation Accuracy: 47.78%
+2023-11-28 04:15:52,701:INFO:Pleural Effusion Validation Accuracy: 43.33%
+2023-11-28 04:22:56,668:INFO:Epoch 3/10
+2023-11-28 04:22:56,680:INFO:Training Loss: 0.2215
+2023-11-28 04:22:56,680:INFO:Validation Loss: 3.8829
+2023-11-28 04:22:56,680:INFO:Cardiomegaly Validation Accuracy: 40.00%
+2023-11-28 04:22:56,680:INFO:Edema Validation Accuracy: 35.56%
+2023-11-28 04:22:56,680:INFO:Consolidation Validation Accuracy: 33.33%
+2023-11-28 04:22:56,680:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 04:22:56,681:INFO:Pleural Effusion Validation Accuracy: 46.67%
+2023-11-28 04:29:59,211:INFO:Epoch 4/10
+2023-11-28 04:29:59,229:INFO:Training Loss: 0.2206
+2023-11-28 04:29:59,229:INFO:Validation Loss: 3.8478
+2023-11-28 04:29:59,229:INFO:Cardiomegaly Validation Accuracy: 36.67%
+2023-11-28 04:29:59,229:INFO:Edema Validation Accuracy: 36.67%
+2023-11-28 04:29:59,229:INFO:Consolidation Validation Accuracy: 35.56%
+2023-11-28 04:29:59,229:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 04:29:59,229:INFO:Pleural Effusion Validation Accuracy: 47.78%
+2023-11-28 04:36:40,200:INFO:Epoch 5/10
+2023-11-28 04:36:40,218:INFO:Training Loss: 0.2205
+2023-11-28 04:36:40,218:INFO:Validation Loss: 3.8359
+2023-11-28 04:36:40,218:INFO:Cardiomegaly Validation Accuracy: 35.56%
+2023-11-28 04:36:40,218:INFO:Edema Validation Accuracy: 34.44%
+2023-11-28 04:36:40,218:INFO:Consolidation Validation Accuracy: 35.56%
+2023-11-28 04:36:40,218:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 04:36:40,218:INFO:Pleural Effusion Validation Accuracy: 44.44%
+2023-11-28 04:43:33,346:INFO:Epoch 6/10
+2023-11-28 04:43:33,362:INFO:Training Loss: 0.2205
+2023-11-28 04:43:33,362:INFO:Validation Loss: 3.8754
+2023-11-28 04:43:33,362:INFO:Cardiomegaly Validation Accuracy: 34.44%
+2023-11-28 04:43:33,362:INFO:Edema Validation Accuracy: 37.78%
+2023-11-28 04:43:33,362:INFO:Consolidation Validation Accuracy: 34.44%
+2023-11-28 04:43:33,362:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 04:43:33,362:INFO:Pleural Effusion Validation Accuracy: 44.44%
+2023-11-28 04:50:32,270:INFO:Epoch 7/10
+2023-11-28 04:50:32,287:INFO:Training Loss: 0.2205
+2023-11-28 04:50:32,287:INFO:Validation Loss: 3.9039
+2023-11-28 04:50:32,287:INFO:Cardiomegaly Validation Accuracy: 34.44%
+2023-11-28 04:50:32,287:INFO:Edema Validation Accuracy: 36.67%
+2023-11-28 04:50:32,287:INFO:Consolidation Validation Accuracy: 33.33%
+2023-11-28 04:50:32,287:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 04:50:32,287:INFO:Pleural Effusion Validation Accuracy: 42.22%
+2023-11-28 04:59:22,042:INFO:Epoch 8/10
+2023-11-28 04:59:22,057:INFO:Training Loss: 0.2212
+2023-11-28 04:59:22,057:INFO:Validation Loss: 3.8845
+2023-11-28 04:59:22,057:INFO:Cardiomegaly Validation Accuracy: 34.44%
+2023-11-28 04:59:22,057:INFO:Edema Validation Accuracy: 42.22%
+2023-11-28 04:59:22,057:INFO:Consolidation Validation Accuracy: 34.44%
+2023-11-28 04:59:22,057:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 04:59:22,057:INFO:Pleural Effusion Validation Accuracy: 47.78%
+2023-11-28 05:08:57,738:INFO:Epoch 9/10
+2023-11-28 05:08:57,747:INFO:Training Loss: 0.2220
+2023-11-28 05:08:57,747:INFO:Validation Loss: 3.8609
+2023-11-28 05:08:57,747:INFO:Cardiomegaly Validation Accuracy: 34.44%
+2023-11-28 05:08:57,747:INFO:Edema Validation Accuracy: 34.44%
+2023-11-28 05:08:57,747:INFO:Consolidation Validation Accuracy: 33.33%
+2023-11-28 05:08:57,747:INFO:Atelectasis Validation Accuracy: 52.22%
+2023-11-28 05:08:57,747:INFO:Pleural Effusion Validation Accuracy: 44.44%
+2023-11-28 05:18:11,879:INFO:Epoch 10/10
+2023-11-28 05:18:11,893:INFO:Training Loss: 0.2204
+2023-11-28 05:18:11,893:INFO:Validation Loss: 3.8445
+2023-11-28 05:18:11,893:INFO:Cardiomegaly Validation Accuracy: 33.33%
+2023-11-28 05:18:11,893:INFO:Edema Validation Accuracy: 38.89%
+2023-11-28 05:18:11,893:INFO:Consolidation Validation Accuracy: 34.44%
+2023-11-28 05:18:11,893:INFO:Atelectasis Validation Accuracy: 51.11%
+2023-11-28 05:18:11,893:INFO:Pleural Effusion Validation Accuracy: 43.33%
+2023-11-28 05:18:21,638:INFO:Task Cardiomegaly Accuracy: 18.00%
+2023-11-28 05:18:21,639:INFO:Task Edema Accuracy: 42.00%
+2023-11-28 05:18:21,639:INFO:Task Consolidation Accuracy: 11.60%
+2023-11-28 05:18:21,639:INFO:Task Atelectasis Accuracy: 22.20%
+2023-11-28 05:18:21,639:INFO:Task Pleural Effusion Accuracy: 53.20%
+2023-11-28 05:18:21,659:INFO:Internal process exited

@@ -1,0 +1,24 @@
+{
+  "auto_map": {
+    "AutoTokenizer": [
+      "microsoft/BiomedVLP-CXR-BERT-specialized--configuration_cxrbert.CXRBertTokenizer",
+      null
+    ]
+  },
+  "clean_up_tokenization_spaces": true,
+  "cls_token": "[CLS]",
+  "do_basic_tokenize": true,
+  "do_lower_case": true,
+  "mask_token": "[MASK]",
+  "model_max_length": 1000000000000000019884624838656,
+  "never_split": null,
+  "pad_token": "[PAD]",
+  "sep_token": "[SEP]",
+  "strip_accents": null,
+  "tokenize_chinese_chars": true,
+  "tokenizer_class": "BertTokenizer",
+  "tokenizer_file": null,
+  "trust_remote_code": true,
+  "unk_token": "[UNK]",
+  "use_fast": true
+}
