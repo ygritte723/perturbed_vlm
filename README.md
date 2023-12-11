@@ -2,6 +2,7 @@
 
 ## Overview
 The approach enhances vision-language models by introducing text perturbation techniques for improving semantic understanding in biomedical applications.
+<img src="readme/Per_arch.png" alt="Per_arch" title="Per_arch" width="500"/>
 
 
 ## Installation
@@ -31,9 +32,6 @@ The model distinguishes between original biomedical reports and their perturbed 
 | Shuffle Words | Randomly shuffles words in a sentence |
 | Reverse Sentence | Reverses the order of words in a sentence |
 | ... | ... |
-
-### Model Architecture
-Description of the model architecture and its components.
 
 ## Evaluation
 - Fine-tuning on RadNLI and MedNLI for text classification
