@@ -30,10 +30,6 @@ The model is trained on a curated dataset of biomedical images and associated re
 - RadNLI and MedNLI: Benchmarks containing labelled hypothesis and premise pairs
 - CheXpert: Chest radiographs with associated radiology reports
 
-## Usage
-Detailed instructions on how to use the model for training and inference.
-
-
 
 ## Evaluation
 Our model demonstrated significant improvements in various biomedical vision-language tasks. Below are the summarized results:
