@@ -36,6 +36,32 @@ Detailed instructions on how to use the model for training and inference.
 
 
 ## Evaluation
-- Fine-tuning on RadNLI and MedNLI for text classification
-- Multi-task image classification on CheXpert
-- Zero-shot clinical semantic structure evaluation on Open-I dataset
+Our model demonstrated significant improvements in various biomedical vision-language tasks. Below are the summarized results:
+
+
+### Fine-Tuned Multi-task Image Classification on the CheXpert Benchmark
+| Model                         | Accuracy on Consolidation (%) | Accuracy on Pleural Effusion (%) | Mean Accuracy (%) |
+|-------------------------------|-------------------------------|----------------------------------|-------------------|
+| CLIP[3]                       | 28.80                         | 43.60                            | 36.20             |
+| GLoRIA[12]                    | 71.11                         | 28.89                            | 50.00             |
+| Ours (w/o local loss)         | 33.80                         | 77.80                            | 55.80             |
+| Ours                          | 93.40                         | 51.80                            | 72.60             |
+
+
+### Fine-Tuned Text Classification on the RadNLI and MedNLI Benchmarks
+| Model                         | MedNLI Accuracy (%) | RadNLI Accuracy (%) |
+|-------------------------------|---------------------|---------------------|
+| CLIP[3]                       | 86.80               | 68.50               |
+| GLoRIA[12]                    | 86.64               | 68.33               |
+| Ours (w/o local loss)         | 87.62               | 66.67               |
+| Ours                          | 85.79               | 68.96               |
+
+
+### Zero-Shot Clinical Semantic Structure Evaluation on the Open-I Benchmark
+| Model                         | Open-I Accuracy (%) |
+|-------------------------------|---------------------|
+| CLIP[3]                       | 43.10               |
+| GLoRIA[12]                    | 44.30               |
+| Ours (w/o local loss)         | 46.30               |
+| Ours                          | 49.00               |
+
