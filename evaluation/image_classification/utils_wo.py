@@ -19,7 +19,9 @@ from health_multimodal.text.model import CXRBertModel, CXRBertConfig, CXRBertTok
 #  -------------------------------------------------------------------------------------------
 
 
+# noinspection PyUnusedLocal
 class CheXpertDataSet(Dataset):
+    # noinspection PyUnusedLocal
     def __init__(self, data_PATH, transform=None, policy="ones"):
         """
         data_PATH: path to the file containing images with corresponding labels.
@@ -239,7 +241,9 @@ class IShuffledContrastiveModel(nn.Module):
         return loss
 
 
+# noinspection PyUnusedLocal
 class ContrastiveModel(nn.Module):
+    # noinspection PyUnusedLocal
     def __init__(self, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
         super(ContrastiveModel, self).__init__()
 
