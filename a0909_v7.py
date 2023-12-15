@@ -6,40 +6,29 @@
 # WANDB_API_KEY=425c813e4ad3283798084d341b069aad7184735b
 """# Set arguments"""
 
-import os,torch
-from torch import Tensor
-from torch.cuda.amp import autocast
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.parallel
-import gc
-from health_multimodal.image.model.encoder import (
-    ImageEncoder
-)
-from health_multimodal.image.model import ImageModel
-from health_multimodal.image.model.types import ImageEncoderType
-from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
-from torch.utils.data import Dataset, DataLoader, random_split
-import os
-from PIL import Image
-from health_multimodal.image.data.io import load_image
-from typing import Tuple
-from tqdm import tqdm
-
 import argparse
+import json
+import math
+import os
+from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-import math
-import json
-from pathlib import Path
-from datetime import datetime
-from torchvision import io, transforms
-from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
-from torch.nn.utils.rnn import pad_sequence
+import torch
+import torch.nn as nn
+import torch.nn.parallel
 import wandb
-from evaluation.shuffled_matching.utils import TextShuffler, pre_caption
+from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import Dataset, DataLoader
 from torchvision.models import resnet50
+from tqdm import tqdm
 
+from evaluation.shuffled_matching.utils import TextShuffler, pre_caption
+from health_multimodal.image.data.io import load_image
+from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
+from health_multimodal.image.model import ImageModel
+from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
 
 if torch.cuda.is_available():
     print("You have a GPU")
@@ -131,8 +120,7 @@ class ShuffledOpenIDataset(Dataset):
                              shuffler.shuffle_nouns_verbs_adj, shuffler.replace_adjectives_with_antonyms,
                              shuffler.swap_adjacent_words]
         for index, ann in tqdm(self.df.iterrows()):
-            test_case = {}
-            test_case["image"] = ann["image"]
+            test_case = {"image": ann["image"]}
             caption = ann['caption']
             test_case["caption_options"] = [pre_caption(caption,max_words)]
             

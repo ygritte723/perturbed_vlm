@@ -40,7 +40,10 @@ Original file is located at
 #!cd /ocean/projects/asc170022p/lisun/xinliu/hi-ml/hi-ml-multimodal/src
 # %ls
 
-import os,torch
+
+
+
+
 torch.cuda.empty_cache()
 #gpu_info = !nvidia-smi -i 0
 #gpu_info = '\n'.join(gpu_info)
@@ -53,23 +56,14 @@ device = torch.device('cuda:0')  # Change to the desired GPU index
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.parallel
 import gc
-from health_multimodal.image.model.encoder import (
-    #DEFAULT_DILATION_VALUES_FOR_RESNET,
-    ImageEncoder
-    #MultiImageEncoder,
-    #restore_training_mode,
-)
 from health_multimodal.image.model import ImageModel
 from health_multimodal.image.model.types import ImageEncoderType
 from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 import os
-from PIL import Image
 from health_multimodal.image.data.io import load_image
-from typing import Tuple
 from tqdm import tqdm
 import argparse
 import pandas as pd
@@ -78,15 +72,12 @@ import json
 from pathlib import Path
 from datetime import datetime
 from health_multimodal.image.model.pretrained import (
-    BIOMED_VLP_BIOVIL_T,
     BIOMED_VLP_CXR_BERT_SPECIALIZED,
-    BIOVIL_T_COMMIT_TAG,
     CXR_BERT_COMMIT_TAG,
 )
-from torchvision import io, transforms
 from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
 from torch.nn.utils.rnn import pad_sequence
-import wandb
+
 #from health_multimodal.image.model.pretrained import get_imagenet_init_encoder
 #from health_multimodal.image.model.resnet import resnet50
 #from health_multimodal.text.inference_engine import TextInferenceEngine
@@ -261,7 +252,7 @@ print(train_dataset[0][1].shape)
 """# Contrastive model"""
 
 class ContrastiveModel(nn.Module):
-    def __init__(self, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
+    def __init__(self, dim=128, K=65536, m=0.999, T=0.07):
         super(ContrastiveModel, self).__init__()
 
         self.K = K
@@ -386,65 +377,6 @@ def adjust_learning_rate(optimizer, epoch, args):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
-# test using a knn monitor
-def test(net, memory_data_loader, test_data_loader, epoch, args):
-    net = net.to(test_device, non_blocking=True)
-    net.eval()
-    classes = len(memory_data_loader.dataset.df.caption)
-    total_top1, total_top5, total_num, feature_bank = 0.0, 0.0, 0, []
-    with torch.no_grad():
-        # generate feature bank
-        for input_ids, attention_mask, image_input in tqdm(memory_data_loader, desc='Feature extracting'):
-            feature = net.image_encoder(image_input.to(test_device, non_blocking=True)).projected_global_embedding
-            feature = nn.functional.normalize(feature, dim=1)  # already normalized
-            feature_bank.append(feature)
-        # [D, N]
-        feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
-        # [N]
-        tokenizer = CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
-        feature_labels = tokenizer.batch_encode_plus(batch_text_or_text_pairs=memory_data_loader.dataset.df.caption.tolist(),
-                                               add_special_tokens=True,
-                                               padding='longest',
-                                               return_tensors='pt')
-        feature_labels = net.text_encoder.get_projected_text_embeddings(
-                            input_ids=feature_labels.input_ids.to(test_device, non_blocking=True),
-                            attention_mask=feature_labels.attention_mask.to(test_device, non_blocking=True))
-        feature_labels = torch.tensor(feature_labels, device=feature_bank.device)
-        # loop test data to predict the label by weighted knn search
-        test_bar = tqdm(test_data_loader)
-        for input_ids, attention_mask, image_input in test_bar:
-            #text, image = text, image.cuda(non_blocking=True)
-            feature = net.image_encoder(image_input.to(test_device, non_blocking=True)).projected_global_embedding
-            feature = nn.functional.normalize(feature, dim=1)  # already normalized
-            
-            pred_labels = knn_predict(feature, feature_bank, feature_labels, classes, args.knn_k, args.knn_t)
-
-            total_num += image_input.size(0)
-            total_top1 += (pred_labels[:, 0] == text).float().sum().item()
-            test_bar.set_description('Test Epoch: [{}/{}] Acc@1:{:.2f}%'.format(epoch, args.epochs, total_top1 / total_num * 100))
-
-    return total_top1 / total_num * 100
-
-# knn monitor as in InstDisc https://arxiv.org/abs/1805.01978
-# implementation follows http://github.com/zhirongw/lemniscate.pytorch and https://github.com/leftthomas/SimCLR
-def knn_predict(feature, feature_bank, feature_labels, classes, knn_k, knn_t):
-    # compute cos similarity between each feature vector and feature bank ---> [B, N]
-    sim_matrix = torch.mm(feature, feature_bank)
-    # [B, K]
-    sim_weight, sim_indices = sim_matrix.topk(k=knn_k, dim=-1)
-    # [B, K]
-    sim_labels = torch.gather(feature_labels.expand(feature.size(0), -1), dim=-1, index=sim_indices)
-    sim_weight = (sim_weight / knn_t).exp()
-
-    # counts for each class
-    one_hot_label = torch.zeros(feature.size(0) * knn_k, classes, device=sim_labels.device)
-    # [B*K, C]
-    one_hot_label = one_hot_label.scatter(dim=-1, index=sim_labels.view(-1, 1), value=1.0)
-    # weighted score ---> [B, C]
-    pred_scores = torch.sum(one_hot_label.view(feature.size(0), -1, classes) * sim_weight.unsqueeze(dim=-1), dim=1)
-
-    pred_labels = pred_scores.argsort(dim=-1, descending=True)
-    return pred_labels
 
 """# Start training"""
 

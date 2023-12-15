@@ -1,33 +1,18 @@
-import os,torch
-from PIL import Image
+import torch
 from tqdm import tqdm
-import argparse
 import numpy as np
 import pandas as pd
-import math
-import json
-from datetime import datetime
 
-from torchvision import io, transforms
 from torch.nn.utils.rnn import pad_sequence
 from utils import TextShuffler, pre_caption, IShuffledContrastiveModel
-from torch.utils.data import Dataset, DataLoader, random_split
 
 from pathlib import Path
-from typing import Optional, Tuple
 
-
-import pydicom as dicom
-import SimpleITK as sitk
-from skimage import io
-
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader
 import os
-from PIL import Image
 from health_multimodal.image.data.io import load_image
-from transformers import BertForMaskedLM, BertConfig, BertTokenizer, BertModel
+from transformers import BertTokenizer
 
-from torchvision import io, transforms
 from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
 import torch.nn as nn
 
@@ -59,8 +44,7 @@ class ShuffledOpenIDataset(Dataset):
         perturb_functions = [shuffler.shuffle_nouns_and_adj, shuffler.shuffle_allbut_nouns_and_adj,
                              shuffler.shuffle_within_trigrams, shuffler.shuffle_trigrams]
         for index, ann in tqdm(self.df.iterrows()):
-            test_case = {}
-            test_case["image"] = ann["image"]
+            test_case = {"image": ann["image"]}
             caption = ann['caption']
             test_case["caption_options"] = [pre_caption(caption,max_words)]
             

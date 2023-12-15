@@ -133,8 +133,7 @@ class ShuffledOpenIDataset(Dataset):
                              shuffler.shuffle_nouns_verbs_adj, shuffler.replace_adjectives_with_antonyms,
                              shuffler.swap_adjacent_words]
         for index, ann in tqdm(self.df.iterrows()):
-            test_case = {}
-            test_case["image"] = ann["image"]
+            test_case = {"image": ann["image"]}
             caption = ann['caption']
             test_case["caption_options"] = [pre_caption(caption,max_words)]
             

@@ -7,7 +7,7 @@
 
 from math import ceil, floor
 from pathlib import Path
-from typing import Callable, List, Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import torch
@@ -82,7 +82,6 @@ class ImageTextInferenceEngine:
             height=height,
             resize_size=self.image_inference_engine.resize_size,
             crop_size=self.image_inference_engine.crop_size,
-            val_img_transform=self.image_inference_engine.transform,
             interpolation=interpolation,
         )
         return resized_sim_map
@@ -115,8 +114,7 @@ class ImageTextInferenceEngine:
         height: int,
         resize_size: Optional[int],
         crop_size: Optional[int],
-        val_img_transform: Optional[Callable] = None,
-        interpolation: str = "nearest",
+            interpolation: str = "nearest",
     ) -> np.ndarray:
         """
         Convert similarity map from raw patch grid to original image size,

@@ -23,7 +23,7 @@ result_fn = 'output/wopretrain/bt64/old_test_results.csv'
 ac_fn = 'output/wopretrain/bt64/old_test_accuracies.txt'
 # # Set up logging
 logging.basicConfig(filename=log_fn, level=logging.INFO,
-                    format='%(asctime)s:%(levelname)s:%(message)s')
+					format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -35,9 +35,9 @@ msg = model.load_state_dict(checkpoint['state_dict'], strict=False)
 optimizer.load_state_dict(checkpoint['optimizer'])
 # # After loading the optimizer state dict
 for state in optimizer.state.values():
-    for k, v in state.items():
-        if isinstance(v, torch.Tensor):
-            state[k] = v.to(device)
+	for k, v in state.items():
+		if isinstance(v, torch.Tensor):
+			state[k] = v.to(device)
 
 print(msg)
 model = model.to(device)
@@ -47,174 +47,173 @@ model.classifier = model.create_downstream_classifier(classifier_hidden_dim=4, n
 criterion = torch.nn.CrossEntropyLoss()
 
 def train_model(model, data_loader, optimizer, criterion, device) -> float:
-    """
-    Trains the model for one epoch on the given data loader.
+	"""
+	Trains the model for one epoch on the given data loader.
 
-    :param model: The model to train.
-    :param data_loader: DataLoader with training data.
-    :param optimizer: Optimizer to use for training.
-    :param criterion: Loss function.
-    :param device: Device to run the training on.
-    :return: Average loss for this epoch.
-    """
-    model.train()  # Set the model to training mode
-    running_loss = 0.0
+	:param model: The model to train.
+	:param data_loader: DataLoader with training data.
+	:param optimizer: Optimizer to use for training.
+	:param criterion: Loss function.
+	:param device: Device to run the training on.
+	:return: Average loss for this epoch.
+	"""
+	model.train()  # Set the model to training mode
+	running_loss = 0.0
 
-    for batch_idx, (images, labels, _) in enumerate(data_loader):
-        images, labels = images.to(device), labels.to(device)
+	for batch_idx, (images, labels, _) in enumerate(data_loader):
+		images, labels = images.to(device), labels.to(device)
 
-        # Zero the parameter gradients
-        optimizer.zero_grad()
+		# Zero the parameter gradients
+		optimizer.zero_grad()
 
-        # Forward pass
-        outputs = model(images).class_logits.to(device)
-        loss = 0.0
+		# Forward pass
+		outputs = model(images).class_logits.to(device)
+		loss = 0.0
 
-        # Calculate loss for each task
-        for task in range(model.classifier.num_tasks):
-            task_labels = labels[:, task].type(torch.LongTensor).to(device)
-            task_outputs = outputs[:, :, task]
-            loss += criterion(task_outputs, task_labels).to(device)
+		# Calculate loss for each task
+		for task in range(model.classifier.num_tasks):
+			task_labels = labels[:, task].type(torch.LongTensor).to(device)
+			task_outputs = outputs[:, :, task]
+			loss += criterion(task_outputs, task_labels).to(device)
 
-        # Backward pass and optimize
-        loss.backward()
-        optimizer.step()
+		# Backward pass and optimize
+		loss.backward()
+		optimizer.step()
 
-        # Statistics
-        running_loss += loss.item()
+		# Statistics
+		running_loss += loss.item()
 
-        if batch_idx % 300 == 299:  # Print every 100 mini-batches
-            print(f'[{batch_idx + 1:5d}] loss: {running_loss / 100:.3f}')
-            running_loss = 0.0
+		if batch_idx % 300 == 299:  # Print every 100 mini-batches
+			print(f'[{batch_idx + 1:5d}] loss: {running_loss / 100:.3f}')
+			running_loss = 0.0
 
-    return running_loss / len(data_loader)
+	return running_loss / len(data_loader)
 
 def validate_model(model, data_loader, criterion, device):
-    model.eval()  # Set the model to evaluation mode
-    running_loss = 0.0
-    task_correct = [0] * len(class_names)
-    task_total = [0] * len(class_names)
+	model.eval()  # Set the model to evaluation mode
+	running_loss = 0.0
+	task_correct = [0] * len(class_names)
+	task_total = [0] * len(class_names)
 
-    with torch.no_grad():
-        for images, labels, _ in data_loader:
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images).class_logits.to(device)
-            loss = sum(criterion(outputs[:, :, task], labels[:, task].type(torch.LongTensor).to(device)) for task in range(len(class_names)))
-            running_loss += loss.item() * images.size(0)
+	with torch.no_grad():
+		for images, labels, _ in data_loader:
+			images, labels = images.to(device), labels.to(device)
+			outputs = model(images).class_logits.to(device)
+			loss = sum(criterion(outputs[:, :, task], labels[:, task].type(torch.LongTensor).to(device)) for task in range(len(class_names)))
+			running_loss += loss.item() * images.size(0)
 
-            # Calculate accuracy
-            for task in range(len(class_names)):
-                _, predicted = torch.max(outputs[:, :, task], 1)
-                task_labels = labels[:, task].type(torch.LongTensor).to(device)
-                task_total[task] += task_labels.size(0)
-                task_correct[task] += (predicted == task_labels).sum().item()
+			# Calculate accuracy
+			for task in range(len(class_names)):
+				_, predicted = torch.max(outputs[:, :, task], 1)
+				task_labels = labels[:, task].type(torch.LongTensor).to(device)
+				task_total[task] += task_labels.size(0)
+				task_correct[task] += (predicted == task_labels).sum().item()
 
-    epoch_loss = running_loss / len(data_loader.dataset)
-    task_accuracy = [100 * task_correct[i] / task_total[i] for i in range(len(class_names))]
-    print(f'Validation loss: {epoch_loss:.3f}')
-    for task_name, acc in zip(class_names, task_accuracy):
-        print(f'{task_name} Validation Accuracy: {acc:.2f}%')
-    return epoch_loss, task_accuracy
-    
+	epoch_loss = running_loss / len(data_loader.dataset)
+	task_accuracy = [100 * task_correct[i] / task_total[i] for i in range(len(class_names))]
+	print(f'Validation loss: {epoch_loss:.3f}')
+	for task_name, acc in zip(class_names, task_accuracy):
+		print(f'{task_name} Validation Accuracy: {acc:.2f}%')
+	return epoch_loss, task_accuracy
+
 
 def evaluate_model(model, data_loader, device):
-    test_header = [
-        'Path',
-        'Cardiomegaly',
-        'Edema',
-        'Consolidation',
-        'Atelectasis',
-        'Pleural Effusion']
+	test_header = [
+		'Path',
+		'Cardiomegaly',
+		'Edema',
+		'Consolidation',
+		'Atelectasis',
+		'Pleural Effusion']
 
-    with open(result_fn, 'w') as f:
-        f.write(','.join(test_header) + '\n')
-        num_tasks = 5
-        model.eval()  # Set the model to evaluation mode
-        task_correct = [0] * num_tasks
-        task_total = [0] * num_tasks
-        task_accuracy = [0] * num_tasks
+	with open(result_fn, 'w') as f:
+		f.write(','.join(test_header) + '\n')
+		num_tasks = 5
+		model.eval()  # Set the model to evaluation mode
+		task_correct = [0] * num_tasks
+		task_total = [0] * num_tasks
+		task_accuracy = [0] * num_tasks
 
-        with torch.no_grad():  # No need to track gradients for evaluation
-            for images, labels, image_names in data_loader:
-                images, labels = images.to(device), labels.to(device)
-                #labels = torch.max(labels, 1)[1]
-                batch_size = len(image_names)
-                # Forward pass to get output/logits
-                outputs = model(images).class_logits
-                # For each task, calculate the accuracy
-                for task in range(num_tasks):
-                    # Get the predictions for the current task
-                    _, predicted = torch.max(outputs[:, :, task], 1)
+		with torch.no_grad():  # No need to track gradients for evaluation
+			for images, labels, image_names in data_loader:
+				images, labels = images.to(device), labels.to(device)
+				#labels = torch.max(labels, 1)[1]
+				# Forward pass to get output/logits
+				outputs = model(images).class_logits
+				# For each task, calculate the accuracy
+				for task in range(num_tasks):
+					# Get the predictions for the current task
+					_, predicted = torch.max(outputs[:, :, task], 1)
 
-                    # Get the labels for the current task
-                    task_labels = labels[:, task].type(torch.LongTensor).to(device)
+					# Get the labels for the current task
+					task_labels = labels[:, task].type(torch.LongTensor).to(device)
 
-                    # Update total and correct counts for the current task
-                    task_total[task] += task_labels.size(0)
-                    task_correct[task] += (predicted == task_labels).sum().item()
+					# Update total and correct counts for the current task
+					task_total[task] += task_labels.size(0)
+					task_correct[task] += (predicted == task_labels).sum().item()
 
 
-                # Calculate accuracy for each task
-                for task in range(num_tasks):
-                    task_accuracy[task] = 100 * task_correct[task] / task_total[task]
+				# Calculate accuracy for each task
+				for task in range(num_tasks):
+					task_accuracy[task] = 100 * task_correct[task] / task_total[task]
 
-    return task_accuracy
+	return task_accuracy
 def run():
-    transforms = Compose([Resize(256), CenterCrop(224), ToTensor()])  
+	transforms = Compose([Resize(256), CenterCrop(224), ToTensor()])
    # Load dataset
-    datasetTrain = CheXpertDataSet(pathFileTrain, transforms, policy = "ones")
-    print("Train data length:", len(datasetTrain))
+	datasetTrain = CheXpertDataSet(pathFileTrain, transforms, policy = "ones")
+	print("Train data length:", len(datasetTrain))
 
-    datasetValid = CheXpertDataSet(pathFileValid, transforms)
-    print("Valid data length:", len(datasetValid))
+	datasetValid = CheXpertDataSet(pathFileValid, transforms)
+	print("Valid data length:", len(datasetValid))
 
-    datasetTest = CheXpertDataSet(pathFileTest, transforms, policy = "ones")
-    print("Test data length:", len(datasetTest))
+	datasetTest = CheXpertDataSet(pathFileTest, transforms, policy = "ones")
+	print("Test data length:", len(datasetTest))
 
-    dataLoaderTrain = DataLoader(dataset = datasetTrain, batch_size = trBatchSize,
-                               shuffle = True, num_workers = 2, pin_memory = True)
+	dataLoaderTrain = DataLoader(dataset = datasetTrain, batch_size = trBatchSize,
+							   shuffle = True, num_workers = 2, pin_memory = True)
 
-    dataLoaderVal = DataLoader(dataset = datasetValid, batch_size = trBatchSize, 
-                           shuffle = False, num_workers = 2, pin_memory = True)
-    dataLoaderTest = DataLoader(dataset = datasetTest, num_workers = 2, pin_memory = True)
+	dataLoaderVal = DataLoader(dataset = datasetValid, batch_size = trBatchSize,
+						   shuffle = False, num_workers = 2, pin_memory = True)
+	dataLoaderTest = DataLoader(dataset = datasetTest, num_workers = 2, pin_memory = True)
 
 
    # print('len: ', len(datasetTest[0][1]))
   #  test_header = [
-        #'Cardiomegaly',
-        #'Edema',
-        #'Consolidation',
+		#'Cardiomegaly',
+		#'Edema',
+		#'Consolidation',
    #     #'Atelectasis',
-     #   'Pleural Effusion']
+	 #   'Pleural Effusion']
    # c = 4
    # for i in test_header:
-     #   print(i+': ')
-    #    a = len([i for i in datasetTest if i[1][c]==1])
-     #   c = c + 1
-     #   print(a)
-    #print(': ', datasetTest[:][1]))
-    
-    
-    # # Training and validation loop
-    num_epochs = 10  # Set the number of epochs
-    for epoch in range(num_epochs):
-        train_loss = train_model(model, dataLoaderTrain, optimizer, criterion, device)
-        val_loss, val_accuracy = validate_model(model, dataLoaderVal, criterion, device)
-        
-        logging.info(f'Epoch {epoch+1}/{num_epochs}')
-        logging.info(f'Training Loss: {train_loss:.4f}')
-        logging.info(f'Validation Loss: {val_loss:.4f}')
-        for task_name, acc in zip(class_names, val_accuracy):
-           logging.info(f'{task_name} Validation Accuracy: {acc:.2f}%')
+	 #   print(i+': ')
+	#    a = len([i for i in datasetTest if i[1][c]==1])
+	 #   c = c + 1
+	 #   print(a)
+	#print(': ', datasetTest[:][1]))
 
-    # # Testing loop
-    test_accuracy = evaluate_model(model, dataLoaderTest, device)
-    for i, acc in zip(class_names, test_accuracy):
-        logging.info(f"Task {i} Accuracy: {acc:.2f}%")
+
+	# # Training and validation loop
+	num_epochs = 10  # Set the number of epochs
+	for epoch in range(num_epochs):
+		train_loss = train_model(model, dataLoaderTrain, optimizer, criterion, device)
+		val_loss, val_accuracy = validate_model(model, dataLoaderVal, criterion, device)
+
+		logging.info(f'Epoch {epoch+1}/{num_epochs}')
+		logging.info(f'Training Loss: {train_loss:.4f}')
+		logging.info(f'Validation Loss: {val_loss:.4f}')
+		for task_name, acc in zip(class_names, val_accuracy):
+		   logging.info(f'{task_name} Validation Accuracy: {acc:.2f}%')
+
+	# # Testing loop
+	test_accuracy = evaluate_model(model, dataLoaderTest, device)
+	for i, acc in zip(class_names, test_accuracy):
+		logging.info(f"Task {i} Accuracy: {acc:.2f}%")
 	print(f"Task {i} Accuracy: {acc:.2f}%")
-    # # Save the test accuracies to a file
-    with open(ac_fn, 'w') as f:
-        for task_name, acc in zip(class_names, test_accuracy):
-            f.write(f"Task {task_name} Accuracy: {acc:.2f}%\n")
+	# # Save the test accuracies to a file
+	with open(ac_fn, 'w') as f:
+		for task_name, acc in zip(class_names, test_accuracy):
+			f.write(f"Task {task_name} Accuracy: {acc:.2f}%\n")
 
 run()

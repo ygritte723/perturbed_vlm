@@ -139,7 +139,6 @@ def evaluate_model(model, data_loader, device):
             for images, labels, image_names in data_loader:
                 images, labels = images.to(device), labels.to(device)
                 #labels = torch.max(labels, 1)[1]
-                batch_size = len(image_names)
                 # Forward pass to get output/logits
                 outputs = model(images).class_logits
                 # For each task, calculate the accuracy

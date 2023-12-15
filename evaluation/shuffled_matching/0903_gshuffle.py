@@ -1,30 +1,17 @@
-import os,torch
-from PIL import Image
-from tqdm import tqdm
-import argparse
+import os
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-import math
-import json
-from datetime import datetime
-from torchvision import io, transforms
-from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import Dataset, DataLoader, random_split
-from pathlib import Path
-from typing import Optional, Tuple
-import pydicom as dicom
-import SimpleITK as sitk
-from skimage import io
-from torch.utils.data import Dataset, DataLoader, random_split
-import os
-from PIL import Image
-from health_multimodal.image.data.io import load_image
-from transformers import BertTokenizer
-from torchvision import io, transforms
-from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
+import torch
 import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import Dataset, DataLoader
+from tqdm import tqdm
+from transformers import BertTokenizer
 
-
+from health_multimodal.image.data.io import load_image
+from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
 from utils_v4 import TextShuffler, pre_caption, GShuffle
 
 batch_size = 64
@@ -67,8 +54,7 @@ class ShuffledOpenIDataset(Dataset):
         perturb_functions = [shuffler.shuffle_nouns_and_adj, shuffler.shuffle_allbut_nouns_and_adj,
                              shuffler.shuffle_within_trigrams, shuffler.shuffle_trigrams]
         for index, ann in tqdm(self.df.iterrows()):
-            test_case = {}
-            test_case["image"] = ann["image"]
+            test_case = {"image": ann["image"]}
             caption = ann['caption']
             test_case["caption_options"] = [pre_caption(caption,max_words)]
             
