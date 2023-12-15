@@ -30,16 +30,22 @@ class ImageInferenceEngine:
             input directly to the image model.
         """
 
-        assert isinstance(image_model, BaseImageModel), f"Expected a BaseImageModel, got {type(image_model)}"
+        assert isinstance(
+            image_model, BaseImageModel
+        ), f"Expected a BaseImageModel, got {type(image_model)}"
 
         self.model = image_model
         self.transform = transform
 
         self.model.eval()
-        self.resize_size, self.crop_size = infer_resize_params(self.transform.transforms)
+        self.resize_size, self.crop_size = infer_resize_params(
+            self.transform.transforms
+        )
         self.to = self.model.to
 
-    def load_and_transform_input_image(self, image_path: Path, transform: Callable) -> Tuple[torch.Tensor, TypeShape2D]:
+    def load_and_transform_input_image(
+        self, image_path: Path, transform: Callable
+    ) -> Tuple[torch.Tensor, TypeShape2D]:
         """Read an image and apply the transform to it.
 
         1. Read the image from the given path
@@ -56,15 +62,21 @@ class ImageInferenceEngine:
         return transformed_image, image.size
 
     @torch.no_grad()
-    def get_projected_patch_embeddings(self, image_path: Path) -> Tuple[torch.Tensor, TypeShape2D]:
+    def get_projected_patch_embeddings(
+        self, image_path: Path
+    ) -> Tuple[torch.Tensor, TypeShape2D]:
         """Compute image patch embeddings in the joint latent space, preserving the image grid.
 
         :param image_path: Path to the image to compute embeddings for.
         :return: A tuple containing the image patch embeddings and
             the shape of the original image (width, height) before applying transforms.
         """
-        input_image, img_shape = self.load_and_transform_input_image(image_path, self.transform)
-        projected_img_emb = self.model.get_patchwise_projected_embeddings(input_image, normalize=True)
+        input_image, img_shape = self.load_and_transform_input_image(
+            image_path, self.transform
+        )
+        projected_img_emb = self.model.get_patchwise_projected_embeddings(
+            input_image, normalize=True
+        )
         assert projected_img_emb.shape[0] == 1
 
         return projected_img_emb[0], img_shape

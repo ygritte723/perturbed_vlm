@@ -3,12 +3,12 @@
 #  Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
 #  ------------------------------------------------------------------------------------------
 
-from typing import Any, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
-from torch import nn
 from torch import Tensor as T
+from torch import nn
 from transformers import BertForMaskedLM
 from transformers.modeling_outputs import ModelOutput
 
@@ -78,9 +78,11 @@ class CXRBertModel(BertForMaskedLM):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         output_cls_projected_embedding: Optional[bool] = None,
-        return_dict: Optional[bool] = None
+        return_dict: Optional[bool] = None,
     ) -> Union[BERTTupleOutput, CXRBertOutput]:
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        return_dict = (
+            return_dict if return_dict is not None else self.config.use_return_dict
+        )
 
         bert_for_masked_lm_output = super().forward(
             input_ids=input_ids,
@@ -96,7 +98,9 @@ class CXRBertModel(BertForMaskedLM):
 
         last_hidden_state = bert_for_masked_lm_output.hidden_states[-1]
         cls_projected_embedding = (
-            self.cls_projection_head(last_hidden_state[:, 0, :]) if output_cls_projected_embedding else None
+            self.cls_projection_head(last_hidden_state[:, 0, :])
+            if output_cls_projected_embedding
+            else None
         )
 
         if return_dict:
@@ -104,7 +108,9 @@ class CXRBertModel(BertForMaskedLM):
                 last_hidden_state=last_hidden_state,
                 logits=bert_for_masked_lm_output.logits,
                 cls_projected_embedding=cls_projected_embedding,
-                hidden_states=bert_for_masked_lm_output.hidden_states if output_hidden_states else None,
+                hidden_states=bert_for_masked_lm_output.hidden_states
+                if output_hidden_states
+                else None,
                 attentions=bert_for_masked_lm_output.attentions,
             )
         else:
@@ -117,7 +123,10 @@ class CXRBertModel(BertForMaskedLM):
             )
 
     def get_projected_text_embeddings(
-        self, input_ids: torch.Tensor, attention_mask: torch.Tensor, normalize_embeddings: bool = True
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        normalize_embeddings: bool = True,
     ) -> torch.Tensor:
         """
         Returns l2-normalised projected cls token embeddings for the given input token ids and attention mask.
@@ -130,7 +139,10 @@ class CXRBertModel(BertForMaskedLM):
         """
 
         outputs = self.forward(
-            input_ids=input_ids, attention_mask=attention_mask, output_cls_projected_embedding=True, return_dict=True
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            output_cls_projected_embedding=True,
+            return_dict=True,
         )
         assert isinstance(outputs, CXRBertOutput)
 

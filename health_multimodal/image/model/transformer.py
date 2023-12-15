@@ -11,7 +11,9 @@ from typing import Any, Callable, Optional, Set, Tuple
 import torch
 import torch.nn as nn
 from timm.models.layers import DropPath, Mlp, trunc_normal_
-#from transformers.pytorch_utils import torch_int_div
+
+
+# from transformers.pytorch_utils import torch_int_div
 
 
 @dataclass
@@ -65,39 +67,56 @@ class VisionTransformerPooler(nn.Module):
 
         # Positional embeddings 1 x L x C (L: Sequence length, C: Feature dimension)
         self.pos_drop = nn.Dropout(p=0.10)
-        pos_embed_class = SinePositionEmbedding(embedding_dim=input_dim // 2, normalize=True)
-        pos_embed = pos_embed_class(mask=torch.ones([1, grid_shape[0], grid_shape[1]]))  # 1 x L x C
+        pos_embed_class = SinePositionEmbedding(
+            embedding_dim=input_dim // 2, normalize=True
+        )
+        pos_embed = pos_embed_class(
+            mask=torch.ones([1, grid_shape[0], grid_shape[1]])
+        )  # 1 x L x C
         self.register_buffer("pos_embed", pos_embed, persistent=False)
 
         # Initialisation
         self.apply(self._init_weights)
 
     def no_weight_decay(self) -> Set[str]:
-        return {'type_embed'}
+        return {"type_embed"}
 
-    def forward(self, current_image: torch.Tensor, previous_image: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(
+        self, current_image: torch.Tensor, previous_image: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         B, C, H, W = current_image.shape
-        assert H == self.grid_shape[0] and W == self.grid_shape[1], "Input and grid shapes do not match"
+        assert (
+            H == self.grid_shape[0] and W == self.grid_shape[1]
+        ), "Input and grid shapes do not match"
 
         # Flatten patch embeddings to have shape (B x L x C), L = H * W
         if previous_image is not None:
-            assert previous_image.shape == current_image.shape, "current_image and previous_image shapes do not match"
+            assert (
+                previous_image.shape == current_image.shape
+            ), "current_image and previous_image shapes do not match"
             previous_image = previous_image.view(B, C, H * W).transpose(1, 2)
         current_image = current_image.view(B, C, H * W).transpose(1, 2)
         pos_embed = self.pos_embed.repeat(B, 1, 1)  # type: ignore
 
         # Final token activations (B x 2L x C)
-        token_features = self.forward_after_reshape(x=current_image, pos_embed=pos_embed, x_previous=previous_image)
+        token_features = self.forward_after_reshape(
+            x=current_image, pos_embed=pos_embed, x_previous=previous_image
+        )
 
         # Extract the patch features of current image
         cur_img_token_id = 0
-        current_token_features = token_features[:, cur_img_token_id : self.num_patches + cur_img_token_id]
+        current_token_features = token_features[
+            :, cur_img_token_id : self.num_patches + cur_img_token_id
+        ]
         current_patch_features = current_token_features.transpose(1, 2).view(B, C, H, W)
 
         return current_patch_features
 
     def forward_after_reshape(
-        self, x: torch.Tensor, pos_embed: torch.Tensor, x_previous: Optional[torch.Tensor] = None
+        self,
+        x: torch.Tensor,
+        pos_embed: torch.Tensor,
+        x_previous: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         B, L, _ = x.shape  # Batch, Sequence length, Feature dimension
 
@@ -144,11 +163,18 @@ class MultiHeadAttentionLayer(nn.Module):
     """
 
     def __init__(
-        self, dim: int, num_heads: int = 8, qkv_bias: bool = False, attn_drop: float = 0.0, proj_drop: float = 0.0
+        self,
+        dim: int,
+        num_heads: int = 8,
+        qkv_bias: bool = False,
+        attn_drop: float = 0.0,
+        proj_drop: float = 0.0,
     ) -> None:
         super().__init__()
         self.num_heads = num_heads
-        assert dim % num_heads == 0, f"The embedding dim ({dim}) must be divisible by the number of heads ({num_heads})"
+        assert (
+            dim % num_heads == 0
+        ), f"The embedding dim ({dim}) must be divisible by the number of heads ({num_heads})"
         head_dim = dim // num_heads
         self.scale = head_dim**-0.5
         self.return_attention = False
@@ -161,15 +187,29 @@ class MultiHeadAttentionLayer(nn.Module):
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop)
 
-    def forward(self, k: torch.Tensor, q: torch.Tensor, v: torch.Tensor) -> MultiHeadAttentionOutput:
+    def forward(
+        self, k: torch.Tensor, q: torch.Tensor, v: torch.Tensor
+    ) -> MultiHeadAttentionOutput:
         B, N, C = v.shape
         assert (
             C % self.num_heads == 0
         ), f"The embedding dim ({C}) must be divisible by the number of heads ({self.num_heads})"
 
-        w_q = self.proj_q(q).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        w_k = self.proj_k(k).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
-        w_v = self.proj_v(v).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+        w_q = (
+            self.proj_q(q)
+            .reshape(B, N, self.num_heads, C // self.num_heads)
+            .permute(0, 2, 1, 3)
+        )
+        w_k = (
+            self.proj_k(k)
+            .reshape(B, N, self.num_heads, C // self.num_heads)
+            .permute(0, 2, 1, 3)
+        )
+        w_v = (
+            self.proj_v(v)
+            .reshape(B, N, self.num_heads, C // self.num_heads)
+            .permute(0, 2, 1, 3)
+        )
 
         attn = (w_q @ w_k.transpose(-2, -1)) * self.scale
         attn = attn.softmax(dim=-1)
@@ -217,18 +257,31 @@ class Block(nn.Module):
         super().__init__()
         self.norm1 = norm_layer(dim)
         self.attn = MultiHeadAttentionLayer(
-            dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop
+            dim=dim,
+            num_heads=num_heads,
+            qkv_bias=qkv_bias,
+            attn_drop=attn_drop,
+            proj_drop=drop,
         )
         self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
-        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+        self.mlp = Mlp(
+            in_features=dim,
+            hidden_features=mlp_hidden_dim,
+            act_layer=act_layer,
+            drop=drop,
+        )
 
-    def with_pos_and_type_embed(self, tensor: torch.Tensor, emb: Optional[torch.Tensor]) -> torch.Tensor:
+    def with_pos_and_type_embed(
+        self, tensor: torch.Tensor, emb: Optional[torch.Tensor]
+    ) -> torch.Tensor:
         # Add positional embeddings to key and query tensors
         return tensor if emb is None else tensor + emb
 
-    def forward(self, x: torch.Tensor, pos_and_type_embed: Optional[torch.Tensor]) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, pos_and_type_embed: Optional[torch.Tensor]
+    ) -> torch.Tensor:
         x_with_emb = self.with_pos_and_type_embed(self.norm1(x), emb=pos_and_type_embed)
         x = x + self.drop_path(self.attn.forward_as_mhsa(x_with_emb).mha_output)
         x = x + self.drop_path(self.mlp(self.norm2(x)))
@@ -243,7 +296,11 @@ class SinePositionEmbedding:
     """
 
     def __init__(
-        self, embedding_dim: int = 64, temperature: int = 10000, normalize: bool = False, scale: Optional[float] = None
+        self,
+        embedding_dim: int = 64,
+        temperature: int = 10000,
+        normalize: bool = False,
+        scale: Optional[float] = None,
     ) -> None:
         super().__init__()
         self.embedding_dim = embedding_dim
@@ -265,12 +322,18 @@ class SinePositionEmbedding:
             x_embed = x_embed / (x_embed[:, :, -1:] + 1e-6) * self.scale
 
         dim_t = torch.arange(self.embedding_dim, dtype=torch.float32)
-        dim_t = self.temperature ** (2 * torch.div(dim_t, 2, rounding_mode="floor") / self.embedding_dim)
+        dim_t = self.temperature ** (
+            2 * torch.div(dim_t, 2, rounding_mode="floor") / self.embedding_dim
+        )
 
         pos_x = x_embed[:, :, :, None] / dim_t
         pos_y = y_embed[:, :, :, None] / dim_t
-        pos_x = torch.stack((pos_x[:, :, :, 0::2].sin(), pos_x[:, :, :, 1::2].cos()), dim=4).flatten(3)
-        pos_y = torch.stack((pos_y[:, :, :, 0::2].sin(), pos_y[:, :, :, 1::2].cos()), dim=4).flatten(3)
+        pos_x = torch.stack(
+            (pos_x[:, :, :, 0::2].sin(), pos_x[:, :, :, 1::2].cos()), dim=4
+        ).flatten(3)
+        pos_y = torch.stack(
+            (pos_y[:, :, :, 0::2].sin(), pos_y[:, :, :, 1::2].cos()), dim=4
+        ).flatten(3)
         pos = torch.cat((pos_y, pos_x), dim=3).view(B, H * W, self.embedding_dim * 2)
 
         return pos

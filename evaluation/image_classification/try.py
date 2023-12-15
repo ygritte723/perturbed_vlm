@@ -1,13 +1,7 @@
-
-import torch
-import csv
-from torchvision.transforms import Compose, Resize, ToTensor, CenterCrop
-from typing import Callable, Sequence, Optional, Tuple
-from utils import CheXpertDataSet, ExpandChannels, IShuffledContrastiveModel
 from torch.utils.data import DataLoader
 
 
-'''pathFileTrain = '/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/train_mod1.csv'
+"""pathFileTrain = '/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/train_mod1.csv'
 pathFileValid = '/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/valid_mod.csv'
 pathFileTest = '/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/test_mod.csv'
 
@@ -29,9 +23,11 @@ print("Test data length:", len(datasetTest))
 print(datasetTest[0][1])
 print(datasetTest[1][1])
 print(datasetTest[2][1])
-'''
+"""
 from PIL import Image
 
-im = Image.open('/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/train/patient00770/study1/view1_frontal.jpg')
+im = Image.open(
+    "/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/train/patient00770/study1/view1_frontal.jpg"
+)
 
 im.show()

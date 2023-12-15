@@ -6,14 +6,16 @@
 from pathlib import Path
 from typing import Optional, Tuple
 
+import SimpleITK as sitk
 import numpy as np
 import pydicom as dicom
 from PIL import Image
-import SimpleITK as sitk
 from skimage import io
 
 
-def remap_to_uint8(array: np.ndarray, percentiles: Optional[Tuple[float, float]] = None) -> np.ndarray:
+def remap_to_uint8(
+    array: np.ndarray, percentiles: Optional[Tuple[float, float]] = None
+) -> np.ndarray:
     """Remap values in input so the output range is :math:`[0, 255]`.
 
     Percentiles can be used to specify the range of values to remap.
@@ -28,13 +30,20 @@ def remap_to_uint8(array: np.ndarray, percentiles: Optional[Tuple[float, float]]
     if percentiles is not None:
         len_percentiles = len(percentiles)
         if len_percentiles != 2:
-            message = 'The value for percentiles should be a sequence of length 2,' f' but has length {len_percentiles}'
+            message = (
+                "The value for percentiles should be a sequence of length 2,"
+                f" but has length {len_percentiles}"
+            )
             raise ValueError(message)
         a, b = percentiles
         if a >= b:
-            raise ValueError(f'Percentiles must be in ascending order, but a sequence "{percentiles}" was passed')
+            raise ValueError(
+                f'Percentiles must be in ascending order, but a sequence "{percentiles}" was passed'
+            )
         if a < 0 or b > 100:
-            raise ValueError(f'Percentiles must be in the range [0, 100], but a sequence "{percentiles}" was passed')
+            raise ValueError(
+                f'Percentiles must be in the range [0, 100], but a sequence "{percentiles}" was passed'
+            )
         cutoff: np.ndarray = np.percentile(array, percentiles)
         array = np.clip(array, *cutoff)
     array -= array.min()

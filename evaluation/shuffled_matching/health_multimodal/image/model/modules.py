@@ -20,18 +20,40 @@ class MLP(nn.Module):
     """
 
     def __init__(
-        self, input_dim: int, output_dim: int, hidden_dim: Optional[int] = None, use_1x1_convs: bool = False
+        self,
+        input_dim: int,
+        output_dim: int,
+        hidden_dim: Optional[int] = None,
+        use_1x1_convs: bool = False,
     ) -> None:
         super().__init__()
 
         if use_1x1_convs:
-            linear_proj_1_args = {'in_channels': input_dim, 'out_channels': hidden_dim, 'kernel_size': 1, 'bias': False}
-            linear_proj_2_args = {'in_channels': hidden_dim, 'out_channels': output_dim, 'kernel_size': 1, 'bias': True}
+            linear_proj_1_args = {
+                "in_channels": input_dim,
+                "out_channels": hidden_dim,
+                "kernel_size": 1,
+                "bias": False,
+            }
+            linear_proj_2_args = {
+                "in_channels": hidden_dim,
+                "out_channels": output_dim,
+                "kernel_size": 1,
+                "bias": True,
+            }
             normalisation_layer: Callable = nn.BatchNorm2d
             projection_layer: Callable = nn.Conv2d
         else:
-            linear_proj_1_args = {'in_features': input_dim, 'out_features': hidden_dim, 'bias': False}
-            linear_proj_2_args = {'in_features': hidden_dim, 'out_features': output_dim, 'bias': True}
+            linear_proj_1_args = {
+                "in_features": input_dim,
+                "out_features": hidden_dim,
+                "bias": False,
+            }
+            linear_proj_2_args = {
+                "in_features": hidden_dim,
+                "out_features": output_dim,
+                "bias": True,
+            }
             normalisation_layer = nn.BatchNorm1d
             projection_layer = nn.Linear
 
@@ -64,7 +86,13 @@ class MultiTaskModel(nn.Module):
     :param num_tasks: Number of classification tasks or heads required.
     """
 
-    def __init__(self, input_dim: int, classifier_hidden_dim: Optional[int], num_classes: int, num_tasks: int):
+    def __init__(
+        self,
+        input_dim: int,
+        classifier_hidden_dim: Optional[int],
+        num_classes: int,
+        num_tasks: int,
+    ):
         super().__init__()
 
         self.num_classes = num_classes
@@ -72,12 +100,22 @@ class MultiTaskModel(nn.Module):
 
         for task in range(num_tasks):
             # TODO check if softmax not needed here.
-            setattr(self, "fc_" + str(task), MLP(input_dim, output_dim=num_classes, hidden_dim=classifier_hidden_dim))
+            setattr(
+                self,
+                "fc_" + str(task),
+                MLP(
+                    input_dim, output_dim=num_classes, hidden_dim=classifier_hidden_dim
+                ),
+            )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Returns [batch_size, num_tasks, num_classes] tensor of logits."""
         batch_size = x.shape[0]
-        out = torch.zeros((batch_size, self.num_classes, self.num_tasks), dtype=x.dtype, device=x.device)
+        out = torch.zeros(
+            (batch_size, self.num_classes, self.num_tasks),
+            dtype=x.dtype,
+            device=x.device,
+        )
         for task in range(self.num_tasks):
             classifier = getattr(self, "fc_" + str(task))
             out[:, :, task] = classifier(x)

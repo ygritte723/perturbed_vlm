@@ -41,100 +41,142 @@ Original file is located at
 # %ls
 
 
-
-
-
 torch.cuda.empty_cache()
-#gpu_info = !nvidia-smi -i 0
-#gpu_info = '\n'.join(gpu_info)
-#print(gpu_info)
+# gpu_info = !nvidia-smi -i 0
+# gpu_info = '\n'.join(gpu_info)
+# print(gpu_info)
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
-device = torch.device('cuda:0')  # Change to the desired GPU index
-#test_device = torch.device('cuda:1')   # Change to the desired GPU index
+device = torch.device("cuda:0")  # Change to the desired GPU index
+# test_device = torch.device('cuda:1')   # Change to the desired GPU index
 
 """# Set arguments"""
 
+import argparse
+import gc
+import json
+import math
+import os
+from datetime import datetime
+from pathlib import Path
+
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.parallel
-import gc
-from health_multimodal.image.model import ImageModel
-from health_multimodal.image.model.types import ImageEncoderType
-from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset, DataLoader
-import os
-from health_multimodal.image.data.io import load_image
 from tqdm import tqdm
-import argparse
-import pandas as pd
-import math
-import json
-from pathlib import Path
-from datetime import datetime
+
+from health_multimodal.image.data.io import load_image
+from health_multimodal.image.data.transforms import (
+    create_chest_xray_transform_for_inference,
+)
+from health_multimodal.image.model import ImageModel
 from health_multimodal.image.model.pretrained import (
     BIOMED_VLP_CXR_BERT_SPECIALIZED,
     CXR_BERT_COMMIT_TAG,
 )
-from health_multimodal.image.data.transforms import create_chest_xray_transform_for_inference
-from torch.nn.utils.rnn import pad_sequence
+from health_multimodal.image.model.types import ImageEncoderType
+from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
 
-#from health_multimodal.image.model.pretrained import get_imagenet_init_encoder
-#from health_multimodal.image.model.resnet import resnet50
-#from health_multimodal.text.inference_engine import TextInferenceEngine
-#from enum import Enum, unique
+# from health_multimodal.image.model.pretrained import get_imagenet_init_encoder
+# from health_multimodal.image.model.resnet import resnet50
+# from health_multimodal.text.inference_engine import TextInferenceEngine
+# from enum import Enum, unique
 
-parser = argparse.ArgumentParser(description='Train MoCo+BIOVIL')
+parser = argparse.ArgumentParser(description="Train MoCo+BIOVIL")
 
-parser.add_argument('-a', '--arch', default='resnet18')
+parser.add_argument("-a", "--arch", default="resnet18")
 
 # lr: 0.06 for batch 512 (or 0.03 for batch 256)
-parser.add_argument('--lr', '--learning-rate', default=0.0015, type=float, metavar='LR', help='initial learning rate', dest='lr')
-parser.add_argument('--epochs', default=100, type=int, metavar='N', help='number of total epochs to run')
-parser.add_argument('--schedule', default=[120, 160], nargs='*', type=int, help='learning rate schedule (when to drop lr by 10x); does not take effect if --cos is on')
-parser.add_argument('--cos', action='store_true', help='use cosine lr schedule')
+parser.add_argument(
+    "--lr",
+    "--learning-rate",
+    default=0.0015,
+    type=float,
+    metavar="LR",
+    help="initial learning rate",
+    dest="lr",
+)
+parser.add_argument(
+    "--epochs", default=100, type=int, metavar="N", help="number of total epochs to run"
+)
+parser.add_argument(
+    "--schedule",
+    default=[120, 160],
+    nargs="*",
+    type=int,
+    help="learning rate schedule (when to drop lr by 10x); does not take effect if --cos is on",
+)
+parser.add_argument("--cos", action="store_true", help="use cosine lr schedule")
 
-parser.add_argument('--batch-size', default=16, type=int, metavar='N', help='mini-batch size')
-parser.add_argument('--wd', default=5e-4, type=float, metavar='W', help='weight decay')
+parser.add_argument(
+    "--batch-size", default=16, type=int, metavar="N", help="mini-batch size"
+)
+parser.add_argument("--wd", default=5e-4, type=float, metavar="W", help="weight decay")
 
 # moco specific configs:
-parser.add_argument('--moco-dim', default=128, type=int, help='feature dimension')
-parser.add_argument('--moco-k', default=4096, type=int, help='queue size; number of negative keys')
-parser.add_argument('--moco-m', default=0.99, type=float, help='moco momentum of updating key encoder')
-parser.add_argument('--moco-t', default=0.1, type=float, help='softmax temperature')
+parser.add_argument("--moco-dim", default=128, type=int, help="feature dimension")
+parser.add_argument(
+    "--moco-k", default=4096, type=int, help="queue size; number of negative keys"
+)
+parser.add_argument(
+    "--moco-m", default=0.99, type=float, help="moco momentum of updating key encoder"
+)
+parser.add_argument("--moco-t", default=0.1, type=float, help="softmax temperature")
 
-#parser.add_argument('--bn-splits', default=8, type=int, help='simulate multi-gpu behavior of BatchNorm in one gpu; 1 is SyncBatchNorm in multi-gpu')
+# parser.add_argument('--bn-splits', default=8, type=int, help='simulate multi-gpu behavior of BatchNorm in one gpu; 1 is SyncBatchNorm in multi-gpu')
 
-#parser.add_argument('--symmetric', action='store_true', help='use a symmetric loss function that backprops to both crops')
+# parser.add_argument('--symmetric', action='store_true', help='use a symmetric loss function that backprops to both crops')
 
 # knn monitor
-parser.add_argument('--knn-k', default=200, type=int, help='k in kNN monitor')
-parser.add_argument('--knn-t', default=0.1, type=float, help='softmax temperature in kNN monitor; could be different with moco-t')
+parser.add_argument("--knn-k", default=200, type=int, help="k in kNN monitor")
+parser.add_argument(
+    "--knn-t",
+    default=0.1,
+    type=float,
+    help="softmax temperature in kNN monitor; could be different with moco-t",
+)
 
 # utils
-parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
-parser.add_argument('--results-dir', default='', type=str, metavar='PATH', help='path to cache (default: none)')
+parser.add_argument(
+    "--resume",
+    default="",
+    type=str,
+    metavar="PATH",
+    help="path to latest checkpoint (default: none)",
+)
+parser.add_argument(
+    "--results-dir",
+    default="",
+    type=str,
+    metavar="PATH",
+    help="path to cache (default: none)",
+)
 
 
 args = parser.parse_args()  # running in command line
 
-#args = parser.parse_args('')  # running in ipynb
+# args = parser.parse_args('')  # running in ipynb
 
 # set command line arguments here when running in ipynb
 args.epochs = 150
 args.cos = True
 args.schedule = []  # cos in use
-#args.symmetric = False
-if args.results_dir == '':
-    args.results_dir = './caches/cache-' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
+# args.symmetric = False
+if args.results_dir == "":
+    args.results_dir = "./caches/cache-" + datetime.now().strftime(
+        "%Y-%m-%d-%H-%M-%S-moco"
+    )
 
 print(args)
 
 """# Dataloader"""
 #  https://www.kaggle.com/code/ahmed010abdo178/gpt-vit2/notebook
-#df2 = pd.read_csv('/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_projections.csv')
-#df1 = pd.read_csv('/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_reports.csv')
-#images_captions_df = pd.DataFrame({'image': [],'caption': []})
-#for i in range(len(df2)):
+# df2 = pd.read_csv('/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_projections.csv')
+# df1 = pd.read_csv('/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_reports.csv')
+# images_captions_df = pd.DataFrame({'image': [],'caption': []})
+# for i in range(len(df2)):
 #    uid = df2.iloc[i]['uid']
 #    image = df2.iloc[i]['filename']
 #    index = df1.loc[df1['uid'] == uid]
@@ -146,41 +188,46 @@ print(args)
 #            continue
 
 #        images_captions_df = pd.concat([images_captions_df, pd.DataFrame([{'image': image, 'caption': caption}])], ignore_index=True)
-#images_captions_df.head() 
-images_captions_df = pd.read_csv('/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_captions.csv')
+# images_captions_df.head()
+images_captions_df = pd.read_csv(
+    "/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_captions.csv"
+)
 
-#import swifter
+# import swifter
 new_df = images_captions_df.copy()
-new_df = new_df.drop(index = range(6000,6469))
+new_df = new_df.drop(index=range(6000, 6469))
 
 val_df = images_captions_df.copy()
-val_df = val_df.drop(index = range(0,6000))
-#print(val_df.head())
+val_df = val_df.drop(index=range(0, 6000))
+# print(val_df.head())
+
 
 def collate_fn(batch):
     input_ids_batch = [item[0] for item in batch]
     attention_mask_batch = [item[1] for item in batch]
     image_input_batch = [item[2] for item in batch]
-    
+
     # Pad sequences to the length of the longest sequence in the batch
     input_ids_padded = pad_sequence(input_ids_batch, batch_first=True)
     attention_mask_padded = pad_sequence(attention_mask_batch, batch_first=True)
-    
+
     # Convert lists to tensors
     input_ids_tensor = input_ids_padded
     attention_mask_tensor = attention_mask_padded
     image_input_tensor = torch.stack(image_input_batch)
-    #print(input_ids_tensor.shape, attention_mask_tensor.shape, image_input_tensor.shape)
-    
+    # print(input_ids_tensor.shape, attention_mask_tensor.shape, image_input_tensor.shape)
+
     return input_ids_tensor, attention_mask_tensor, image_input_tensor
+
 
 class OpenIDataset(Dataset):
     def __init__(self, df, root_dir, transform=None):
         self.df = df
         self.transform = transform
         self.root_dir = root_dir
-        self.tokenizer= CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
-
+        self.tokenizer = CXRBertTokenizer.from_pretrained(
+            BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG
+        )
 
     def __len__(self):
         return len(self.df)
@@ -188,68 +235,96 @@ class OpenIDataset(Dataset):
     def __getitem__(self, idx):
         # Text encoding (Bag of Words)
         caption = [self.df.caption.iloc[idx]]
-        #print(caption,len(caption))
-        
-        tokenizer_output = self.tokenizer.batch_encode_plus(batch_text_or_text_pairs=caption,
-                                               add_special_tokens=True,
-                                               padding='longest',
-                                               return_tensors='pt')
+        # print(caption,len(caption))
+
+        tokenizer_output = self.tokenizer.batch_encode_plus(
+            batch_text_or_text_pairs=caption,
+            add_special_tokens=True,
+            padding="longest",
+            return_tensors="pt",
+        )
         input_ids = tokenizer_output.input_ids.view(-1).squeeze()
         attention_mask = tokenizer_output.attention_mask.view(-1).squeeze()
         image = self.df.image.iloc[idx]
         img_path = os.path.join(self.root_dir, image)
-        #print(idx)
+        # print(idx)
         img_path = Path(img_path)
         img = load_image(img_path)
 
         if self.transform is not None:
             img = self.transform(img)
 
-        #pixel_values = self.feature_extractor(img, return_tensors="pt").pixel_values
-        #print(input_ids.shape, attention_mask.shape, img.shape)
+        # pixel_values = self.feature_extractor(img, return_tensors="pt").pixel_values
+        # print(input_ids.shape, attention_mask.shape, img.shape)
         return input_ids, attention_mask, img
-#train_dataset = OpenIDataset(
-    #new_df,
-    #root_dir= "/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized"
-    #tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
-    #)
-#print(train_dataset[0][0].shape, train_dataset[0][1].shape, train_dataset[0][2])
-#gc.collect()
-#torch.cuda.empty_cache()
-#del train_dataset
+
+
+# train_dataset = OpenIDataset(
+# new_df,
+# root_dir= "/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized"
+# tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
+# )
+# print(train_dataset[0][0].shape, train_dataset[0][1].shape, train_dataset[0][2])
+# gc.collect()
+# torch.cuda.empty_cache()
+# del train_dataset
 
 
 transforms = create_chest_xray_transform_for_inference(
-    #resize=512,
-    #center_crop_size=448
+    # resize=512,
+    # center_crop_size=448
     resize=256,
-    center_crop_size=224
-    )
+    center_crop_size=224,
+)
 
 train_dataset = OpenIDataset(
     new_df,
-    root_dir= "/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
-    #tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
-    transform=transforms
-    )
+    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
+    transform=transforms,
+)
 memory_dataset = OpenIDataset(
     new_df,
-    root_dir= "/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
-    #tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
-    transform=transforms
-    )
+    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
+    transform=transforms,
+)
 test_dataset = OpenIDataset(
     val_df,
-    root_dir = "/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
-    #tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
-    transform  = transforms)
-train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory=False, drop_last=True, collate_fn=collate_fn)
-memory_loader = DataLoader(memory_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory=False, collate_fn=collate_fn)
-test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory=False, collate_fn=collate_fn)
+    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
+    transform=transforms,
+)
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=args.batch_size,
+    shuffle=True,
+    num_workers=2,
+    pin_memory=False,
+    drop_last=True,
+    collate_fn=collate_fn,
+)
+memory_loader = DataLoader(
+    memory_dataset,
+    batch_size=args.batch_size,
+    shuffle=False,
+    num_workers=2,
+    pin_memory=False,
+    collate_fn=collate_fn,
+)
+test_loader = DataLoader(
+    test_dataset,
+    batch_size=args.batch_size,
+    shuffle=False,
+    num_workers=2,
+    pin_memory=False,
+    collate_fn=collate_fn,
+)
 
 print(train_dataset[0][1].shape)
 
 """# Contrastive model"""
+
 
 class ContrastiveModel(nn.Module):
     def __init__(self, dim=128, K=65536, m=0.999, T=0.07):
@@ -259,15 +334,19 @@ class ContrastiveModel(nn.Module):
         self.m = m
         self.T = T
         # Text Encoder CXRBert
-        self.text_encoder = CXRBertModel.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
+        self.text_encoder = CXRBertModel.from_pretrained(
+            BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG
+        )
         # Image Encoder ResNet50
-        self.image_encoder = ImageModel(img_encoder_type=ImageEncoderType.RESNET50.value, joint_feature_size=128)
+        self.image_encoder = ImageModel(
+            img_encoder_type=ImageEncoderType.RESNET50.value, joint_feature_size=128
+        )
         # create the queue
         self.register_buffer("queue", torch.randn(dim, K))
         self.queue = nn.functional.normalize(self.queue, dim=0)
         # newly added
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
-        
+
     # newly added
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys):
@@ -277,17 +356,16 @@ class ContrastiveModel(nn.Module):
         assert self.K % batch_size == 0  # for simplicity
 
         # replace the keys at ptr (dequeue and enqueue)
-        self.queue[:, ptr:ptr + batch_size] = keys.t()  # transpose
+        self.queue[:, ptr : ptr + batch_size] = keys.t()  # transpose
         ptr = (ptr + batch_size) % self.K  # move pointer
 
         self.queue_ptr[0] = ptr
 
-
     def contrastive_loss(self, input_ids, attention_mask, image_input):
         # Text encoding
         text_encoding = self.text_encoder.get_projected_text_embeddings(
-                            input_ids=input_ids,
-                            attention_mask=attention_mask)
+            input_ids=input_ids, attention_mask=attention_mask
+        )
 
         # Image encoding
         image_encoding = self.image_encoder(image_input).projected_global_embedding
@@ -296,9 +374,9 @@ class ContrastiveModel(nn.Module):
         # compute logits
         # Einstein sum is more intuitive
         # positive logits: Nx1
-        l_pos = torch.einsum('nc,nc->n', [q, k]).unsqueeze(-1)
+        l_pos = torch.einsum("nc,nc->n", [q, k]).unsqueeze(-1)
         # negative logits: NxK
-        l_neg = torch.einsum('nc,ck->nk', [q, self.queue.clone().detach()])
+        l_neg = torch.einsum("nc,ck->nk", [q, self.queue.clone().detach()])
 
         # logits: Nx(1+K)
         logits = torch.cat([l_pos, l_neg], dim=1)
@@ -314,7 +392,6 @@ class ContrastiveModel(nn.Module):
         return loss, k
 
     def forward(self, input_ids, attention_mask, image_input):
-
         loss, k = self.contrastive_loss(input_ids, attention_mask, image_input)
         # newly added
         self._dequeue_and_enqueue(k)
@@ -322,24 +399,24 @@ class ContrastiveModel(nn.Module):
         return loss
 
 
-
 # Create the contrastive model
 
-#print(model.text_encoder)
-#print(model.image_encoder)
-#model = torch.nn.DataParallel(model, device_ids=device_ids) 
+# print(model.text_encoder)
+# print(model.image_encoder)
+# model = torch.nn.DataParallel(model, device_ids=device_ids)
 
 # Sample inputs
-#text_input = ["There is no pneumothorax or pleural effusion",
-                #"The extent of the pleural effusion is constant."] # Example text input (replace with your own)
-#image_input = torch.randn(2, 3, 128, 128).cuda(non_blocking=True)  # Example image batch with 2 images
+# text_input = ["There is no pneumothorax or pleural effusion",
+# "The extent of the pleural effusion is constant."] # Example text input (replace with your own)
+# image_input = torch.randn(2, 3, 128, 128).cuda(non_blocking=True)  # Example image batch with 2 images
 
 
-#output = model(text_input, image_input)
-#print("Output shape:", output.shape)
-#print(output)
+# output = model(text_input, image_input)
+# print("Output shape:", output.shape)
+# print(output)
 
 """# Define train/test"""
+
 
 # train for one epoch
 def train(net, data_loader, train_optimizer, epoch, args):
@@ -349,33 +426,44 @@ def train(net, data_loader, train_optimizer, epoch, args):
 
     total_loss, total_num, train_bar = 0.0, 0, tqdm(data_loader)
     for input_ids, attention_mask, image_input in train_bar:
-        input_ids, attention_mask, image_input = input_ids.to(device), attention_mask.to(device), image_input.to(device)
-        #print(input_ids.shape, attention_mask.shape, image_input.shape)
+        input_ids, attention_mask, image_input = (
+            input_ids.to(device),
+            attention_mask.to(device),
+            image_input.to(device),
+        )
+        # print(input_ids.shape, attention_mask.shape, image_input.shape)
         loss = net(input_ids, attention_mask, image_input)
 
         train_optimizer.zero_grad()
         loss.backward()
         train_optimizer.step()
-        #torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
         total_num += data_loader.batch_size
         total_loss += loss.item() * data_loader.batch_size
-        train_bar.set_description('Train Epoch: [{}/{}], lr: {:.6f}, Loss: {:.4f}'.format(
-            epoch, args.epochs, train_optimizer.param_groups[0]['lr'], total_loss / total_num))
+        train_bar.set_description(
+            "Train Epoch: [{}/{}], lr: {:.6f}, Loss: {:.4f}".format(
+                epoch,
+                args.epochs,
+                train_optimizer.param_groups[0]["lr"],
+                total_loss / total_num,
+            )
+        )
 
     return total_loss / total_num
+
 
 # lr scheduler for training
 def adjust_learning_rate(optimizer, epoch, args):
     """Decay the learning rate based on schedule"""
     lr = args.lr
     if args.cos:  # cosine lr schedule
-        lr *= 0.5 * (1. + math.cos(math.pi * epoch / args.epochs))
+        lr *= 0.5 * (1.0 + math.cos(math.pi * epoch / args.epochs))
     else:  # stepwise lr schedule
         for milestone in args.schedule:
-            lr *= 0.1 if epoch >= milestone else 1.
+            lr *= 0.1 if epoch >= milestone else 1.0
     for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+        param_group["lr"] = lr
 
 
 """# Start training"""
@@ -383,38 +471,46 @@ def adjust_learning_rate(optimizer, epoch, args):
 # define optimizer
 model = ContrastiveModel().to(device)
 
-optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.wd, momentum=0.9)
+optimizer = torch.optim.SGD(
+    model.parameters(), lr=args.lr, weight_decay=args.wd, momentum=0.9
+)
 
 # load model if resume
 epoch_start = 1
-if args.resume != '':
+if args.resume != "":
     checkpoint = torch.load(args.resume, map_location=device)
-    model.load_state_dict(checkpoint['state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer'])
-    epoch_start = checkpoint['epoch'] + 1
-    print('Loaded from: {}'.format(args.resume))
+    model.load_state_dict(checkpoint["state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer"])
+    epoch_start = checkpoint["epoch"] + 1
+    print("Loaded from: {}".format(args.resume))
 
 # logging
-#results = {'train_loss': [], 'test_acc@1': []}
-results = {'train_loss': []}
+# results = {'train_loss': [], 'test_acc@1': []}
+results = {"train_loss": []}
 if not os.path.exists(args.results_dir):
     os.mkdir(args.results_dir)
 # dump args
-with open(args.results_dir + '/args.json', 'w') as fid:
+with open(args.results_dir + "/args.json", "w") as fid:
     json.dump(args.__dict__, fid, indent=2)
 
 # training loop
 for epoch in range(epoch_start, args.epochs + 1):
     train_loss = train(model, train_loader, optimizer, epoch, args)
-    results['train_loss'].append(train_loss)
-    #test_acc_1 = test(model, memory_loader, test_loader, epoch, args)
-    #results['test_acc@1'].append(test_acc_1)
+    results["train_loss"].append(train_loss)
+    # test_acc_1 = test(model, memory_loader, test_loader, epoch, args)
+    # results['test_acc@1'].append(test_acc_1)
     # save statistics
     data_frame = pd.DataFrame(data=results, index=range(epoch_start, epoch + 1))
-    data_frame.to_csv(args.results_dir + '/log.csv', index_label='epoch')
+    data_frame.to_csv(args.results_dir + "/log.csv", index_label="epoch")
     # save model
-    torch.save({'epoch': epoch, 'state_dict': model.state_dict(), 'optimizer' : optimizer.state_dict(),}, args.results_dir + '/model_last.pth')
+    torch.save(
+        {
+            "epoch": epoch,
+            "state_dict": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+        },
+        args.results_dir + "/model_last.pth",
+    )
     gc.collect()
     torch.cuda.empty_cache()
-    #model.save_pretrained("./save_pretrained/"+str(epoch))
-
+    # model.save_pretrained("./save_pretrained/"+str(epoch))

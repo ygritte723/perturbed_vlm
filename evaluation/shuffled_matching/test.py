@@ -1,17 +1,19 @@
 from utils import TextShuffler, pre_caption
 
+
 class TextShufflerTester:
-    
     @staticmethod
     def test_shuffler():
-        example_text = "The lungs are clear there is no pleural effusion or pneumothorax"
+        example_text = (
+            "The lungs are clear there is no pleural effusion or pneumothorax"
+        )
 
         shuffler = TextShuffler()
 
         print("Original Text:")
         print(example_text)
-        
-        example_text = pre_caption(example_text,50)
+
+        example_text = pre_caption(example_text, 50)
         print("\nShuffled Nouns and Adjectives:")
         print(shuffler.shuffle_nouns_and_adj(example_text))
         print("\nShuffled All Words:")
@@ -30,6 +32,7 @@ class TextShufflerTester:
         print(shuffler.replace_adjectives_with_antonyms(example_text))
         print("\nSwap adjacent words in the sentence:")
         print(shuffler.swap_adjacent_words(example_text))
+
 
 # Run the test
 TextShufflerTester.test_shuffler()

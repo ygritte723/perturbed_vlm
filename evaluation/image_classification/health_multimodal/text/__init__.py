@@ -33,13 +33,12 @@
 """
 
 from .data.io import TypePrompts
-from .utils import get_bert_inference
 from .inference_engine import TextInferenceEngine
+from .model import CXRBertConfig
 from .model import CXRBertModel
 from .model import CXRBertOutput
-from .model import CXRBertConfig
 from .model import CXRBertTokenizer
-
+from .utils import get_bert_inference
 
 __all__ = [
     "TypePrompts",

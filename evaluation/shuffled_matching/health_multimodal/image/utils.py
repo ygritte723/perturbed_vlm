@@ -19,7 +19,9 @@ class ImageModelType(str, Enum):
     BIOVIL_T = "biovil_t"
 
 
-def get_image_inference(image_model_type: ImageModelType = ImageModelType.BIOVIL_T) -> ImageInferenceEngine:
+def get_image_inference(
+    image_model_type: ImageModelType = ImageModelType.BIOVIL_T,
+) -> ImageInferenceEngine:
     """Create a :class:`ImageInferenceEngine` for the image model.
 
     :param image_model_type: The type of image model to use, `BIOVIL` or `BIOVIL_T`.

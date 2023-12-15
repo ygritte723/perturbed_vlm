@@ -10,9 +10,9 @@ from typing import Any, Generator, Optional, Sequence, Tuple, Union
 
 import torch
 import torch.nn as nn
-from health_multimodal.common.device import get_module_device
 from timm.models.layers import trunc_normal_
 
+from health_multimodal.common.device import get_module_device
 from .resnet import resnet18, resnet50
 from .transformer import VisionTransformerPooler
 from .types import ImageEncoderType
@@ -34,29 +34,43 @@ class ImageEncoder(nn.Module):
         self.encoder = self._create_encoder()
 
     def _create_encoder(self, **kwargs: Any) -> nn.Module:
-        if self.img_encoder_type in [ImageEncoderType.RESNET18, ImageEncoderType.RESNET18_MULTI_IMAGE]:
+        if self.img_encoder_type in [
+            ImageEncoderType.RESNET18,
+            ImageEncoderType.RESNET18_MULTI_IMAGE,
+        ]:
             encoder_class = resnet18
-        elif self.img_encoder_type in [ImageEncoderType.RESNET50, ImageEncoderType.RESNET50_MULTI_IMAGE]:
+        elif self.img_encoder_type in [
+            ImageEncoderType.RESNET50,
+            ImageEncoderType.RESNET50_MULTI_IMAGE,
+        ]:
             encoder_class = resnet50
         else:
             supported = ImageEncoderType.get_members(multi_image_encoders_only=False)
-            raise NotImplementedError(f"Image encoder type \"{self.img_encoder_type}\" must be in {supported}")
+            raise NotImplementedError(
+                f'Image encoder type "{self.img_encoder_type}" must be in {supported}'
+            )
 
         encoder = encoder_class(pretrained=False, **kwargs)
 
         return encoder
 
-    def forward(self, current_image: torch.Tensor, return_patch_embeddings: bool = False) -> ImageEncoderOutputType:
+    def forward(
+        self, current_image: torch.Tensor, return_patch_embeddings: bool = False
+    ) -> ImageEncoderOutputType:
         """Get image global and patch embeddings"""
 
         patch_emb = self.encoder(current_image)
-        avg_pooled_emb = torch.flatten(torch.nn.functional.adaptive_avg_pool2d(patch_emb, (1, 1)), 1)
+        avg_pooled_emb = torch.flatten(
+            torch.nn.functional.adaptive_avg_pool2d(patch_emb, (1, 1)), 1
+        )
         if return_patch_embeddings:
             return patch_emb, avg_pooled_emb
 
         return avg_pooled_emb
 
-    def reload_encoder_with_dilation(self, replace_stride_with_dilation: Optional[Sequence[bool]] = None) -> None:
+    def reload_encoder_with_dilation(
+        self, replace_stride_with_dilation: Optional[Sequence[bool]] = None
+    ) -> None:
         """Workaround for enabling dilated convolutions after model initialization.
 
         :param replace_stride_with_dilation: Replace the 2x2 standard convolution stride with a dilated convolution
@@ -70,7 +84,9 @@ class ImageEncoder(nn.Module):
             replace_stride_with_dilation = DEFAULT_DILATION_VALUES_FOR_RESNET
 
         device = next(self.encoder.parameters()).device
-        new_encoder = self._create_encoder(replace_stride_with_dilation=replace_stride_with_dilation).to(device)
+        new_encoder = self._create_encoder(
+            replace_stride_with_dilation=replace_stride_with_dilation
+        ).to(device)
 
         if self.encoder.training:
             new_encoder.train()
@@ -95,7 +111,9 @@ class MultiImageEncoder(ImageEncoder):
         output_dim = 256  # The aggregate feature dim of the encoder is `2 * output_dim` i.e. [f_static, f_diff]
         grid_shape = (14, 14)  # Spatial dimensions of patch grid.
 
-        backbone_output_feature_dim = get_encoder_output_dim(self.encoder, device=get_module_device(self))
+        backbone_output_feature_dim = get_encoder_output_dim(
+            self.encoder, device=get_module_device(self)
+        )
 
         self.backbone_to_vit = nn.Conv2d(
             in_channels=backbone_output_feature_dim,
@@ -105,7 +123,9 @@ class MultiImageEncoder(ImageEncoder):
             padding=0,
             bias=False,
         )
-        self.vit_pooler = VisionTransformerPooler(input_dim=output_dim, grid_shape=grid_shape)
+        self.vit_pooler = VisionTransformerPooler(
+            input_dim=output_dim, grid_shape=grid_shape
+        )
 
         # Missing image embedding
         self.missing_previous_emb = nn.Parameter(torch.zeros(1, output_dim, 1, 1))
@@ -125,7 +145,9 @@ class MultiImageEncoder(ImageEncoder):
             x = super().forward(x, return_patch_embeddings=True)[0]
             x = self.backbone_to_vit(x)
             patch_x, patch_x_previous = x[:batch_size], x[batch_size:]
-            diff_x = self.vit_pooler(current_image=patch_x, previous_image=patch_x_previous)
+            diff_x = self.vit_pooler(
+                current_image=patch_x, previous_image=patch_x_previous
+            )
         else:
             x = super().forward(current_image, return_patch_embeddings=True)[0]
             patch_x = self.backbone_to_vit(x)
@@ -133,14 +155,18 @@ class MultiImageEncoder(ImageEncoder):
             diff_x = self.missing_previous_emb.repeat(B, 1, W, H)
 
         patch_fused = torch.cat([patch_x, diff_x], dim=1)
-        avg_pooled_emb = torch.flatten(torch.nn.functional.adaptive_avg_pool2d(patch_fused, (1, 1)), 1)
+        avg_pooled_emb = torch.flatten(
+            torch.nn.functional.adaptive_avg_pool2d(patch_fused, (1, 1)), 1
+        )
 
         if return_patch_embeddings:
             return patch_fused, avg_pooled_emb
 
         return avg_pooled_emb
 
-    def reload_encoder_with_dilation(self, replace_stride_with_dilation: Optional[Sequence[bool]] = None) -> None:
+    def reload_encoder_with_dilation(
+        self, replace_stride_with_dilation: Optional[Sequence[bool]] = None
+    ) -> None:
         raise NotImplementedError
 
 

@@ -24,7 +24,9 @@ class TextInferenceEngine(TextInput):
     def __init__(self, tokenizer: BertTokenizer, text_model: BertForMaskedLM) -> None:
         super().__init__(tokenizer=tokenizer)
 
-        assert isinstance(text_model, BertForMaskedLM), f"Expected a BertForMaskedLM, got {type(text_model)}"
+        assert isinstance(
+            text_model, BertForMaskedLM
+        ), f"Expected a BertForMaskedLM, got {type(text_model)}"
 
         self.model = text_model
         self.max_allowed_input_length = self.model.config.max_position_embeddings
@@ -34,7 +36,9 @@ class TextInferenceEngine(TextInput):
         """Returns True if the model is in eval mode."""
         return not self.model.training
 
-    def tokenize_input_prompts(self, prompts: Union[str, List[str]], verbose: bool = True) -> Any:
+    def tokenize_input_prompts(
+        self, prompts: Union[str, List[str]], verbose: bool = True
+    ) -> Any:
         tokenizer_output = super().tokenize_input_prompts(prompts, verbose=verbose)
         device = next(self.model.parameters()).device
         tokenizer_output.input_ids = tokenizer_output.input_ids.to(device)
@@ -51,7 +55,10 @@ class TextInferenceEngine(TextInput):
 
     @torch.no_grad()
     def get_embeddings_from_prompt(
-        self, prompts: Union[str, List[str]], normalize: bool = True, verbose: bool = True
+        self,
+        prompts: Union[str, List[str]],
+        normalize: bool = True,
+        verbose: bool = True,
     ) -> torch.Tensor:
         """Generate L2-normalised embeddings for a list of input text prompts.
 
@@ -100,7 +107,8 @@ class TextInferenceEngine(TextInput):
 
         # Collect all token predictions
         text_model_output = self.model.forward(
-            input_ids=tokenized_prompts.input_ids, attention_mask=tokenized_prompts.attention_mask
+            input_ids=tokenized_prompts.input_ids,
+            attention_mask=tokenized_prompts.attention_mask,
         )
         logits = text_model_output.logits
         logits = logits.detach()

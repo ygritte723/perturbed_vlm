@@ -10,17 +10,18 @@ from pathlib import Path
 
 from torch.hub import load_state_dict_from_url
 from torchvision.datasets.utils import download_url
-#from torchvision.models.resnet import model_urls
 
 from .model import ImageModel
 from .types import ImageEncoderType, ImageEncoderWeightTypes
 
+# from torchvision.models.resnet import model_urls
+
 model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
-    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
-    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
-    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
-    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
+    "resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",
+    "resnet34": "https://download.pytorch.org/models/resnet34-333f7ec4.pth",
+    "resnet50": "https://download.pytorch.org/models/resnet50-19c8e357.pth",
+    "resnet101": "https://download.pytorch.org/models/resnet101-5d3b4d8f.pth",
+    "resnet152": "https://download.pytorch.org/models/resnet152-b121ed2d.pth",
 }
 JOINT_FEATURE_SIZE = 128
 
@@ -36,9 +37,7 @@ BIOVIL_IMAGE_WEIGHTS_URL = f"{HF_URL}/{BIOMED_VLP_CXR_BERT_SPECIALIZED}/resolve/
 BIOVIL_IMAGE_WEIGHTS_MD5 = "02ce6ee460f72efd599295f440dbb453"
 
 BIOVIL_T_IMAGE_WEIGHTS_NAME = "biovil_t_image_model_proj_size_128.pt"
-BIOVIL_T_IMAGE_WEIGHTS_URL = (
-    f"{HF_URL}/{BIOMED_VLP_BIOVIL_T}/resolve/{BIOVIL_T_COMMIT_TAG}/{BIOVIL_T_IMAGE_WEIGHTS_NAME}"  # noqa: E501
-)
+BIOVIL_T_IMAGE_WEIGHTS_URL = f"{HF_URL}/{BIOMED_VLP_BIOVIL_T}/resolve/{BIOVIL_T_COMMIT_TAG}/{BIOVIL_T_IMAGE_WEIGHTS_NAME}"  # noqa: E501
 BIOVIL_T_IMAGE_WEIGHTS_MD5 = "a83080e2f23aa584a4f2b24c39b1bb64"
 
 
@@ -64,14 +63,19 @@ def _download_biovil_t_image_model_weights() -> Path:
     """
     root_dir = tempfile.gettempdir()
     download_url(
-        BIOVIL_T_IMAGE_WEIGHTS_URL, root=root_dir, filename=BIOVIL_T_IMAGE_WEIGHTS_NAME, md5=BIOVIL_T_IMAGE_WEIGHTS_MD5
+        BIOVIL_T_IMAGE_WEIGHTS_URL,
+        root=root_dir,
+        filename=BIOVIL_T_IMAGE_WEIGHTS_NAME,
+        md5=BIOVIL_T_IMAGE_WEIGHTS_MD5,
     )
     return Path(root_dir, BIOVIL_T_IMAGE_WEIGHTS_NAME)
 
 
 def get_biovil_image_encoder(pretrained: bool = True) -> ImageModel:
     """Download weights from Hugging Face and instantiate the image model."""
-    resnet_checkpoint_path = _download_biovil_image_model_weights() if pretrained else None
+    resnet_checkpoint_path = (
+        _download_biovil_image_model_weights() if pretrained else None
+    )
 
     image_model = ImageModel(
         img_encoder_type=ImageEncoderType.RESNET50,
