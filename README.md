@@ -1,19 +1,32 @@
-# Perturbed Report Discrimination for Biomedical Vision-Language Models
+# Enhancing Biomedical Multi-modal Representation Learning with Multi-scale Pre-training and Perturbed Report Discrimination
 
 ## Overview
-The approach enhances vision-language models by introducing text perturbation techniques for improving semantic understanding in biomedical applications.
-<img src="readme/Per_arch.png" alt="Per_arch" title="Per_arch" width="500"/>
+The approach enhances vision-language models by introducing text perturbations as negative samples and localized attention representation for improving granularity level of understanding in biomedical applications.
+<img src="readme/Per_arch.png" alt="Per_arch" title="Per_arch" width="700"/>
 
 ## Methodology
 ### Approach
-The model distinguishes between original biomedical reports and their perturbed versions, paired with images. 
+The architecture integrates unimodal feature extractors for both images and texts, pretrained separately, and a contrastive projection approach to fuse the cross-modal embeddings into a joint space. The novelty includes:
+- **Local Attentive Contrastive Loss**: Boosts precision in medical Image-Text matching by aligning specific image sub-regions with relevant text fragments.
+- **Report Perturbation Sensitivity Loss**: Enhances understanding of clinical semantics focusing on sentence structure and part of speech, paired with standard Image-Report Matching Contrastive Loss.
 
 #### Text Perturbation Methods
-| Perturbation Type | Description |
-| ----------------- | ----------- |
-| Shuffle Words | Randomly shuffles words in a sentence |
-| Reverse Sentence | Reverses the order of words in a sentence |
-| ... | ... |
+The following table lists various text perturbation methods used in our approach:
+
+| Perturbation Type                   | Description                                              |
+|-------------------------------------|----------------------------------------------------------|
+| Shuffle All Words                   | Randomly shuffles all words in a sentence                |
+| Swap Adjacent Words                 | Swaps adjacent words in the sentence                     |
+| Reverse Sentence                    | Reverses the order of words in a sentence                |
+| Shuffle Within Trigrams             | Shuffles words within each trigram in the sentence       |
+| Shuffle Trigrams                    | Shuffles the trigrams within the sentence                |
+| Shuffle Nouns and Adjectives        | Shuffles nouns and adjectives while keeping others fixed |
+| Shuffle All but Nouns and Adjectives| Shuffles all parts of speech except nouns and adjectives |
+| Shuffle Nouns, Verbs, and Adjectives| Shuffles nouns, verbs, and adjectives only               |
+| Replace Adjectives with Antonyms    | Replaces adjectives in the sentence with their antonyms  |
+
+These perturbations are used to create negative samples for training the model, enhancing its ability to understand and discriminate between perturbed and original reports.
+
 
 
 ## Installation
