@@ -317,11 +317,11 @@ class ContrastiveModel(nn.Module):
         self.T = T
         # Text Encoder CXRBert
         self.text_encoder = CXRBertModel.from_pretrained(
-            BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG
+            "microsoft/BiomedVLP-CXR-BERT-specialized", revision="v1.1"
         )
         # Image Encoder ResNet50
         self.image_encoder = ImageModel(
-            img_encoder_type=ImageEncoderType.RESNET50.value, joint_feature_size=128
+            img_encoder_type="resnet50", joint_feature_size=128
         )
 
         self.criterion = nn.CrossEntropyLoss()
