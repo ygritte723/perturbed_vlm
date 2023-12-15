@@ -32,7 +32,7 @@ class ResNetHIML(ResNet):
         super().__init__(**kwargs)
 
     def forward(
-        self, x: torch.Tensor, return_intermediate_layers: bool = False
+            self, x: torch.Tensor, return_intermediate_layers: bool = False
     ) -> Union[torch.Tensor, TypeSkipConnections]:
         """ResNetHIML forward pass. Optionally returns intermediate layers using the
         ``return_intermediate_layers`` argument.
@@ -58,12 +58,12 @@ class ResNetHIML(ResNet):
 
 
 def _resnet(
-    arch: str,
-    block: Type[Union[BasicBlock, Bottleneck]],
-    layers: List[int],
-    pretrained: bool,
-    progress: bool,
-    **kwargs: Any
+        arch: str,
+        block: Type[Union[BasicBlock, Bottleneck]],
+        layers: List[int],
+        pretrained: bool,
+        progress: bool,
+        **kwargs: Any
 ) -> ResNetHIML:
     """Instantiate a custom :class:`ResNet` model.
 
@@ -77,7 +77,7 @@ def _resnet(
 
 
 def resnet18(
-    pretrained: bool = False, progress: bool = True, **kwargs: Any
+        pretrained: bool = False, progress: bool = True, **kwargs: Any
 ) -> ResNetHIML:
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
@@ -89,7 +89,7 @@ def resnet18(
 
 
 def resnet50(
-    pretrained: bool = False, progress: bool = True, **kwargs: Any
+        pretrained: bool = False, progress: bool = True, **kwargs: Any
 ) -> ResNetHIML:
     r"""ResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.

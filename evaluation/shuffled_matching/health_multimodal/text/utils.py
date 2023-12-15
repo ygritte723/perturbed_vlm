@@ -46,7 +46,7 @@ def get_cxr_bert() -> Tuple[CXRBertTokenizer, CXRBertModel]:
 
 
 def get_bert_inference(
-    bert_encoder_type: BertEncoderType = BertEncoderType.BIOVIL_T_BERT,
+        bert_encoder_type: BertEncoderType = BertEncoderType.BIOVIL_T_BERT,
 ) -> TextInferenceEngine:
     """Create a :class:`TextInferenceEngine` for a text encoder model.
 

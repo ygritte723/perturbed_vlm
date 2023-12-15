@@ -26,7 +26,7 @@ class ExpandChannels:
 
 
 def create_chest_xray_transform_for_inference(
-    resize: int, center_crop_size: int
+        resize: int, center_crop_size: int
 ) -> Compose:
     """
     Defines the image transformation pipeline for Chest-Xray datasets.
@@ -46,7 +46,7 @@ def create_chest_xray_transform_for_inference(
 
 
 def infer_resize_params(
-    val_img_transforms: Sequence[Callable],
+        val_img_transforms: Sequence[Callable],
 ) -> Tuple[Optional[int], Optional[int]]:
     """
     Given the validation transforms pipeline, extract the sizes to which the image was resized and cropped, if any.
@@ -62,8 +62,8 @@ def infer_resize_params(
             )
         if isinstance(transform, Resize):
             if (
-                resize_size_from_transforms is None
-                and crop_size_from_transforms is None
+                    resize_size_from_transforms is None
+                    and crop_size_from_transforms is None
             ):
                 assert transform.max_size is None
                 assert isinstance(

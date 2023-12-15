@@ -64,9 +64,9 @@ class IShuffledContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -93,14 +93,14 @@ class IShuffledContrastiveModel(nn.Module):
             text_embeds = nn.functional.normalize(text_embeds, dim=1)
 
             logits_text_per_image = (
-                self.logit_scale.exp() * image_embeds @ text_embeds.t()
+                    self.logit_scale.exp() * image_embeds @ text_embeds.t()
             )
             logits_image_per_text = logits_text_per_image.t()
 
             logits[:, txt] = (
-                torch.sum(logits_text_per_image, dim=1)
-                + torch.sum(logits_image_per_text, dim=1)
-            ) / 2
+                                     torch.sum(logits_text_per_image, dim=1)
+                                     + torch.sum(logits_image_per_text, dim=1)
+                             ) / 2
 
         # Compute the cross-entropy loss
         targets = torch.zeros(batch_size, dtype=torch.long).to(
@@ -185,9 +185,9 @@ class ShuffledContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -342,9 +342,9 @@ class ContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -508,21 +508,21 @@ class TextShuffler:
             i
             for i, token in enumerate(doc)
             if token.tag_
-            in [
-                "NN",
-                "NNS",
-                "NNP",
-                "NNPS",
-                "JJ",
-                "JJR",
-                "JJS",
-                "VB",
-                "VBD",
-                "VBG",
-                "VBN",
-                "VBP",
-                "VBZ",
-            ]
+               in [
+                   "NN",
+                   "NNS",
+                   "NNP",
+                   "NNPS",
+                   "JJ",
+                   "JJR",
+                   "JJS",
+                   "VB",
+                   "VBD",
+                   "VBG",
+                   "VBN",
+                   "VBP",
+                   "VBZ",
+               ]
         ]
         text[idx] = np.random.permutation(text[idx])
         return " ".join(text)

@@ -14,17 +14,20 @@ from health_multimodal.image.data.io import load_image
 from health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
-from utils_wo import TextShuffler, pre_caption, ContrastiveModel
+from utils_v4 import TextShuffler, pre_caption, GShuffle
 
 batch_size = 64
 lr = 0.0015
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = ContrastiveModel()
+model = GShuffle()
 
 # optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=wd, momentum=0.9)
 # optimizer.load_state_dict(checkpoint['optimizer'])
-pt = "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/caches-wopretrain/bt64/cache-2023-11-27-22-06-16-moco/model_last.pth"
+pt = (
+        "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/"
+        + "new_caches_v7/T0.1_L0.1_shuffle-temp0.01/cache-2023-11-27-06-06-56-moco/model_last.pth"
+)
 checkpoint = torch.load(pt, map_location=device)
 print("checkpoint_path:", pt)
 
@@ -150,7 +153,6 @@ test_loader = DataLoader(
     pin_memory=False,
     collate_fn=collate_fn,
 )
-
 
 model = model.to(device)
 criterion = nn.CrossEntropyLoss()

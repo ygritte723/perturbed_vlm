@@ -18,9 +18,9 @@ TypeArrayImage = Union[np.ndarray, Image.Image]
 
 
 def _plot_image(
-    image: TypeArrayImage,
-    axis: plt.Axes,
-    title: Optional[str] = None,
+        image: TypeArrayImage,
+        axis: plt.Axes,
+        title: Optional[str] = None,
 ) -> None:
     """Plot an image on a given axis, deleting the axis ticks and axis labels.
 
@@ -41,12 +41,12 @@ def _get_isolines_levels(step_size: float) -> np.ndarray:
 
 
 def _plot_isolines(
-    image: TypeArrayImage,
-    heatmap: np.ndarray,
-    axis: plt.Axes,
-    title: Optional[str] = None,
-    colormap: str = "RdBu_r",
-    step: float = 0.25,
+        image: TypeArrayImage,
+        heatmap: np.ndarray,
+        axis: plt.Axes,
+        title: Optional[str] = None,
+        colormap: str = "RdBu_r",
+        step: float = 0.25,
 ) -> None:
     """Plot an image and overlay heatmap isolines on it.
 
@@ -74,13 +74,13 @@ def _plot_isolines(
 
 
 def _plot_heatmap(
-    image: TypeArrayImage,
-    heatmap: np.ndarray,
-    figure: plt.Figure,
-    axis: plt.Axes,
-    colormap: str = "RdBu_r",
-    title: Optional[str] = None,
-    alpha: float = 0.5,
+        image: TypeArrayImage,
+        heatmap: np.ndarray,
+        figure: plt.Figure,
+        axis: plt.Axes,
+        colormap: str = "RdBu_r",
+        title: Optional[str] = None,
+        alpha: float = 0.5,
 ) -> None:
     """Plot a heatmap overlaid on an image.
 
@@ -107,9 +107,9 @@ def _plot_heatmap(
 
 
 def plot_phrase_grounding_similarity_map(
-    image_path: Path,
-    similarity_map: np.ndarray,
-    bboxes: Optional[List[Tuple[float, float, float, float]]] = None,
+        image_path: Path,
+        similarity_map: np.ndarray,
+        bboxes: Optional[List[Tuple[float, float, float, float]]] = None,
 ) -> plt.Figure:
     """Plot visualization of the input image, the similarity heatmap and the heatmap isolines.
 
@@ -130,10 +130,10 @@ def plot_phrase_grounding_similarity_map(
 
 
 def _plot_bounding_boxes(
-    ax: plt.Axes,
-    bboxes: List[Tuple[float, float, float, float]],
-    linewidth: float = 1.5,
-    alpha: float = 0.45,
+        ax: plt.Axes,
+        bboxes: List[Tuple[float, float, float, float]],
+        linewidth: float = 1.5,
+        alpha: float = 0.45,
 ) -> None:
     """
     Plot bounding boxes on an existing axes object.

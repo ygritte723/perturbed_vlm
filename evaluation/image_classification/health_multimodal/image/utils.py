@@ -20,7 +20,7 @@ class ImageModelType(str, Enum):
 
 
 def get_image_inference(
-    image_model_type: ImageModelType = ImageModelType.BIOVIL_T,
+        image_model_type: ImageModelType = ImageModelType.BIOVIL_T,
 ) -> ImageInferenceEngine:
     """Create a :class:`ImageInferenceEngine` for the image model.
 

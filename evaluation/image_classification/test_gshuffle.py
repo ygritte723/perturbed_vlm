@@ -16,8 +16,8 @@ class_names = [
 ]
 
 checkpoint_path = (
-    "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/"
-    + "new_caches_v7/T0.1_L0.1_shuffle-temp0.07/bt50/cache-2023-11-25-22-45-13-moco/model_last.pth"
+        "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/"
+        + "new_caches_v7/T0.1_L0.1_shuffle-temp0.07/bt50/cache-2023-11-25-22-45-13-moco/model_last.pth"
 )
 
 torch.manual_seed(0)
@@ -34,7 +34,6 @@ ac_fn = "output/pretrained/bt50/gshuffle_T01_L01_shuffle-temp0_07_test_accuracie
 logging.basicConfig(
     filename=log_fn, level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s"
 )
-
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = GShuffle()
@@ -218,8 +217,8 @@ def run():
     for epoch in range(num_epochs):
         train_loss = train_model(model, dataLoaderTrain, optimizer, criterion, device)
         val_loss, val_accuracy = validate_model(model, dataLoaderVal, criterion, device)
-        print(f"Epoch {epoch+1}/{num_epochs}")
-        logging.info(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"Epoch {epoch + 1}/{num_epochs}")
+        logging.info(f"Epoch {epoch + 1}/{num_epochs}")
         logging.info(f"Training Loss: {train_loss:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f}")
         for task_name, acc in zip(class_names, val_accuracy):

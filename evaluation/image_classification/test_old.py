@@ -29,7 +29,6 @@ logging.basicConfig(
     filename=log_fn, level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s"
 )
 
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = ContrastiveModel()
 optimizer = torch.optim.SGD(
@@ -209,9 +208,9 @@ def run():
 
     # print('len: ', len(datasetTest[0][1]))
     #  test_header = [
-    #'Cardiomegaly',
-    #'Edema',
-    #'Consolidation',
+    # 'Cardiomegaly',
+    # 'Edema',
+    # 'Consolidation',
     #     #'Atelectasis',
     #   'Pleural Effusion']
     # c = 4
@@ -228,7 +227,7 @@ def run():
         train_loss = train_model(model, dataLoaderTrain, optimizer, criterion, device)
         val_loss, val_accuracy = validate_model(model, dataLoaderVal, criterion, device)
 
-        logging.info(f"Epoch {epoch+1}/{num_epochs}")
+        logging.info(f"Epoch {epoch + 1}/{num_epochs}")
         logging.info(f"Training Loss: {train_loss:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f}")
         for task_name, acc in zip(class_names, val_accuracy):

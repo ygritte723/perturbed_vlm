@@ -14,7 +14,7 @@ from skimage import io
 
 
 def remap_to_uint8(
-    array: np.ndarray, percentiles: Optional[Tuple[float, float]] = None
+        array: np.ndarray, percentiles: Optional[Tuple[float, float]] = None
 ) -> np.ndarray:
     """Remap values in input so the output range is :math:`[0, 255]`.
 

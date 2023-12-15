@@ -44,7 +44,7 @@ class ImageInferenceEngine:
         self.to = self.model.to
 
     def load_and_transform_input_image(
-        self, image_path: Path, transform: Callable
+            self, image_path: Path, transform: Callable
     ) -> Tuple[torch.Tensor, TypeShape2D]:
         """Read an image and apply the transform to it.
 
@@ -63,7 +63,7 @@ class ImageInferenceEngine:
 
     @torch.no_grad()
     def get_projected_patch_embeddings(
-        self, image_path: Path
+            self, image_path: Path
     ) -> Tuple[torch.Tensor, TypeShape2D]:
         """Compute image patch embeddings in the joint latent space, preserving the image grid.
 

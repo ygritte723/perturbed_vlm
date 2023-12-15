@@ -68,17 +68,17 @@ class CXRBertModel(BertForMaskedLM):
         self.init_weights()
 
     def forward(
-        self,
-        input_ids: torch.Tensor,
-        attention_mask: torch.Tensor,
-        token_type_ids: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.Tensor] = None,
-        head_mask: Optional[torch.Tensor] = None,
-        inputs_embeds: Optional[torch.Tensor] = None,
-        output_attentions: Optional[bool] = None,
-        output_hidden_states: Optional[bool] = None,
-        output_cls_projected_embedding: Optional[bool] = None,
-        return_dict: Optional[bool] = None,
+            self,
+            input_ids: torch.Tensor,
+            attention_mask: torch.Tensor,
+            token_type_ids: Optional[torch.Tensor] = None,
+            position_ids: Optional[torch.Tensor] = None,
+            head_mask: Optional[torch.Tensor] = None,
+            inputs_embeds: Optional[torch.Tensor] = None,
+            output_attentions: Optional[bool] = None,
+            output_hidden_states: Optional[bool] = None,
+            output_cls_projected_embedding: Optional[bool] = None,
+            return_dict: Optional[bool] = None,
     ) -> Union[BERTTupleOutput, CXRBertOutput]:
         return_dict = (
             return_dict if return_dict is not None else self.config.use_return_dict
@@ -123,10 +123,10 @@ class CXRBertModel(BertForMaskedLM):
             )
 
     def get_projected_text_embeddings(
-        self,
-        input_ids: torch.Tensor,
-        attention_mask: torch.Tensor,
-        normalize_embeddings: bool = True,
+            self,
+            input_ids: torch.Tensor,
+            attention_mask: torch.Tensor,
+            normalize_embeddings: bool = True,
     ) -> torch.Tensor:
         """
         Returns l2-normalised projected cls token embeddings for the given input token ids and attention mask.

@@ -20,11 +20,11 @@ class MLP(nn.Module):
     """
 
     def __init__(
-        self,
-        input_dim: int,
-        output_dim: int,
-        hidden_dim: Optional[int] = None,
-        use_1x1_convs: bool = False,
+            self,
+            input_dim: int,
+            output_dim: int,
+            hidden_dim: Optional[int] = None,
+            use_1x1_convs: bool = False,
     ) -> None:
         super().__init__()
 
@@ -87,11 +87,11 @@ class MultiTaskModel(nn.Module):
     """
 
     def __init__(
-        self,
-        input_dim: int,
-        classifier_hidden_dim: Optional[int],
-        num_classes: int,
-        num_tasks: int,
+            self,
+            input_dim: int,
+            classifier_hidden_dim: Optional[int],
+            num_classes: int,
+            num_tasks: int,
     ):
         super().__init__()
 

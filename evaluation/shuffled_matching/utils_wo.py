@@ -75,9 +75,9 @@ class ShuffledContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -242,9 +242,9 @@ class IShuffledContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -362,9 +362,9 @@ class ContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -432,7 +432,7 @@ class Identity(nn.Module):
 
 class Gloria(nn.Module):
     def __init__(
-        self, L=0.5, last_n_layer=4, local_temp1=4.0, local_temp2=5.0, local_temp3=10.0
+            self, L=0.5, last_n_layer=4, local_temp1=4.0, local_temp2=5.0, local_temp3=10.0
     ):
         super(Gloria, self).__init__()
 
@@ -582,22 +582,22 @@ class Gloria(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
         # print('global loss: ', str(loss))
         return loss
 
     def local_loss(
-        self,
-        input_ids,
-        attention_mask,
-        token_type_ids,
-        cap_lens,
-        image_input,
-        temp1=4.0,
-        temp2=5.0,
-        temp3=10.0,
+            self,
+            input_ids,
+            attention_mask,
+            token_type_ids,
+            cap_lens,
+            image_input,
+            temp1=4.0,
+            temp2=5.0,
+            temp3=10.0,
     ):
         # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = image_input.shape[0]
@@ -605,12 +605,12 @@ class Gloria(nn.Module):
         # local_image_embeds = self.local_image_encoder(image_input, return_intermediate_layers=True)[3]
         local_image_embeds = self.resnet_forward(image_input)
         if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-            torch.isinf(local_image_embeds)
+                torch.isinf(local_image_embeds)
         ):
             print("NaN or Inf in image_input after encoder")
         local_image_embeds = self.local_embedder(local_image_embeds)
         if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-            torch.isinf(local_image_embeds)
+                torch.isinf(local_image_embeds)
         ):
             print("NaN or Inf in local_image_embeds after embedder")
 
@@ -625,7 +625,7 @@ class Gloria(nn.Module):
         all_embeddings = text_outputs[3]
 
         embeddings = torch.stack(
-            all_embeddings[-self.last_n_layer :]
+            all_embeddings[-self.last_n_layer:]
         )  # layers, batch, sent_len, embedding size
 
         embeddings = embeddings.permute(1, 0, 2, 3)
@@ -640,10 +640,10 @@ class Gloria(nn.Module):
         word_embeddings = word_embeddings.view(batch_dim, num_words, 768)
         word_embeddings = word_embeddings.permute(0, 2, 1)
         word_embeddings = word_embeddings / (
-            torch.norm(word_embeddings, 2, dim=1, keepdim=True).expand_as(
-                word_embeddings
-            )
-            + 1e-6
+                torch.norm(word_embeddings, 2, dim=1, keepdim=True).expand_as(
+                    word_embeddings
+                )
+                + 1e-6
         )
         words_emb = word_embeddings
 
@@ -712,14 +712,14 @@ class Gloria(nn.Module):
 
 class GShuffle(nn.Module):
     def __init__(
-        self,
-        T=0.5,
-        shuffle_temp=0.07,
-        L=0.5,
-        last_n_layer=4,
-        local_temp1=4.0,
-        local_temp2=5.0,
-        local_temp3=10.0,
+            self,
+            T=0.5,
+            shuffle_temp=0.07,
+            L=0.5,
+            last_n_layer=4,
+            local_temp1=4.0,
+            local_temp2=5.0,
+            local_temp3=10.0,
     ):
         super(GShuffle, self).__init__()
 
@@ -803,9 +803,9 @@ class GShuffle(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -920,15 +920,15 @@ class GShuffle(nn.Module):
         return local_features
 
     def local_loss(
-        self,
-        input_ids,
-        attention_mask,
-        token_type_ids,
-        cap_lens,
-        image_input,
-        temp1=4.0,
-        temp2=5.0,
-        temp3=10.0,
+            self,
+            input_ids,
+            attention_mask,
+            token_type_ids,
+            cap_lens,
+            image_input,
+            temp1=4.0,
+            temp2=5.0,
+            temp3=10.0,
     ):
         # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = image_input.shape[0]
@@ -936,12 +936,12 @@ class GShuffle(nn.Module):
         # local_image_embeds = self.local_image_encoder(image_input, return_intermediate_layers=True)[3]
         local_image_embeds = self.resnet_forward(image_input)
         if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-            torch.isinf(local_image_embeds)
+                torch.isinf(local_image_embeds)
         ):
             print("NaN or Inf in image_input after encoder")
         local_image_embeds = self.local_embedder(local_image_embeds)
         if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-            torch.isinf(local_image_embeds)
+                torch.isinf(local_image_embeds)
         ):
             print("NaN or Inf in local_image_embeds after embedder")
 
@@ -957,7 +957,7 @@ class GShuffle(nn.Module):
         # print(len(all_embeddings))
         # (batch_size, sequence_length, hidden_size)
         embeddings = torch.stack(
-            all_embeddings[-self.last_n_layer :]
+            all_embeddings[-self.last_n_layer:]
         )  # layers, batch, sent_len, embedding size
 
         embeddings = embeddings.permute(1, 0, 2, 3)
@@ -971,10 +971,10 @@ class GShuffle(nn.Module):
         word_embeddings = word_embeddings.view(batch_dim, num_words, 768)
         word_embeddings = word_embeddings.permute(0, 2, 1)
         word_embeddings = word_embeddings / (
-            torch.norm(word_embeddings, 2, dim=1, keepdim=True).expand_as(
-                word_embeddings
-            )
-            + 1e-6
+                torch.norm(word_embeddings, 2, dim=1, keepdim=True).expand_as(
+                    word_embeddings
+                )
+                + 1e-6
         )
         words_emb = word_embeddings
 
@@ -1074,20 +1074,7 @@ def get_text_perturb_fn(text_perturb_fn):
         return shuffle_all_words
     elif text_perturb_fn == "shuffle_trigrams":
         return shuffle_trigrams
-
-    # newly added
-    elif text_perturb_fn == "swap_adjacent_words":
-        return swap_adjacent_words
-    elif text_perturb_fn == "shuffle_all_words":
-        return shuffle_all_words
-    elif text_perturb_fn == "reverse_sentence":
-        return reverse_sentence
-    elif text_perturb_fn == "shuffle_nouns_verbs_adj":
-        return shuffle_nouns_verbs_adj
-    elif text_perturb_fn == "replace_adjectives_with_antonyms":
-        return replace_adjectives_with_antonyms
-
-    elif text_perturb_fn is None:
+   elif text_perturb_fn is None:
         return None
     else:
         print(
@@ -1198,83 +1185,6 @@ class TextShuffler:
         random.shuffle(trigrams)
         shuffled_ex = " ".join([" ".join(trigram) for trigram in trigrams])
         return shuffled_ex
-
-    # Newly added funcs
-    def reverse_sentence(self, ex):
-        """
-        Reverse the order of words in the sentence.
-        """
-        return " ".join(reversed(ex.split()))
-
-    def shuffle_nouns_verbs_adj(self, ex):
-        """
-        Shuffle nouns, verbs, and adjectives within the text.
-        """
-        doc = self.nlp(ex)
-        tokens = [token.text for token in doc]
-        text = np.array(tokens)
-        idx = [
-            i
-            for i, token in enumerate(doc)
-            if token.tag_
-            in [
-                "NN",
-                "NNS",
-                "NNP",
-                "NNPS",
-                "JJ",
-                "JJR",
-                "JJS",
-                "VB",
-                "VBD",
-                "VBG",
-                "VBN",
-                "VBP",
-                "VBZ",
-            ]
-        ]
-        text[idx] = np.random.permutation(text[idx])
-        return " ".join(text)
-
-    def replace_adjectives_with_antonyms(self, ex):
-        """
-        Replace adjectives in the sentence with their antonyms.
-        """
-        from nltk.corpus import wordnet
-
-        doc = self.nlp(ex)
-        new_sentence = []
-        for token in doc:
-            if token.pos_ == "ADJ":
-                antonyms = []
-                for syn in wordnet.synsets(token.text):
-                    if syn.pos() == wordnet.ADJ:
-                        for lemma in syn.lemmas():
-                            if lemma.antonyms():
-                                antonyms.append(lemma.antonyms()[0].name())
-                # Choose an antonym if available, otherwise use original word
-                new_word = random.choice(antonyms) if antonyms else token.text
-                new_sentence.append(new_word)
-            else:
-                new_sentence.append(token.text)
-        return " ".join(new_sentence)
-
-    def swap_adjacent_words(self, ex):
-        """
-        Swap adjacent words in the sentence.
-        """
-        words = ex.split()
-        swapped_sentence = []
-        i = 0
-        while i < len(words):
-            if i + 1 < len(words):
-                swapped_sentence.append(words[i + 1])
-                swapped_sentence.append(words[i])
-                i += 2
-            else:
-                swapped_sentence.append(words[i])
-                i += 1
-        return " ".join(swapped_sentence)
 
 
 def _handle_image_4shuffle(x):

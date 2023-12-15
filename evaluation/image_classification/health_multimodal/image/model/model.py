@@ -28,7 +28,7 @@ class BaseImageModel(nn.Module, ABC):
 
     @abstractmethod
     def get_patchwise_projected_embeddings(
-        self, input_img: torch.Tensor, normalize: bool
+            self, input_img: torch.Tensor, normalize: bool
     ) -> torch.Tensor:
         raise NotImplementedError
 
@@ -37,12 +37,12 @@ class ImageModel(BaseImageModel):
     """Image encoder module"""
 
     def __init__(
-        self,
-        img_encoder_type: str,
-        joint_feature_size: int,
-        freeze_encoder: bool = False,
-        pretrained_model_path: Optional[Union[str, Path]] = None,
-        **downstream_classifier_kwargs: Any,
+            self,
+            img_encoder_type: str,
+            joint_feature_size: int,
+            freeze_encoder: bool = False,
+            pretrained_model_path: Optional[Union[str, Path]] = None,
+            **downstream_classifier_kwargs: Any,
     ):
         super().__init__()
 
@@ -90,7 +90,7 @@ class ImageModel(BaseImageModel):
         return self.forward_post_encoder(patch_x, pooled_x)
 
     def forward_post_encoder(
-        self, patch_x: torch.Tensor, pooled_x: torch.Tensor
+            self, patch_x: torch.Tensor, pooled_x: torch.Tensor
     ) -> ImageModelOutput:
         with torch.set_grad_enabled(not self.freeze_encoder):
             projected_patch_embeddings = self.projector(patch_x)
@@ -116,7 +116,7 @@ class ImageModel(BaseImageModel):
 
     @torch.no_grad()
     def get_patchwise_projected_embeddings(
-        self, input_img: torch.Tensor, normalize: bool
+            self, input_img: torch.Tensor, normalize: bool
     ) -> torch.Tensor:
         """Get patch-wise projected embeddings from the CNN model.
 
@@ -145,7 +145,7 @@ class MultiImageModel(ImageModel):
         ), "MultiImageModel only supports MultiImageEncoder"
 
     def forward(  # type: ignore[override]
-        self, current_image: torch.Tensor, previous_image: Optional[torch.Tensor] = None
+            self, current_image: torch.Tensor, previous_image: Optional[torch.Tensor] = None
     ) -> ImageModelOutput:
         with torch.set_grad_enabled(not self.freeze_encoder):
             patch_x, pooled_x = self.encoder(

@@ -123,7 +123,6 @@ parser.add_argument(
 )
 parser.add_argument("--wandb", default=False, type=bool, help="whether to use wandb")
 
-
 args = parser.parse_args()  # running in command line
 
 # args = parser.parse_args('')  # running in ipynb
@@ -135,10 +134,10 @@ args.schedule = []  # cos in use
 # args.symmetric = False
 if args.results_dir == "":
     args.results_dir = (
-        "./caches-wopretrain/bt"
-        + str(args.batch_size)
-        + "/cache-"
-        + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
+            "./caches-wopretrain/bt"
+            + str(args.batch_size)
+            + "/cache-"
+            + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
     )
 
 print(args)
@@ -154,7 +153,6 @@ if args.wandb:
         # Track hyperparameters and run metadata
         config=args,
     )
-
 
 """# Dataloader"""
 #  https://www.kaggle.com/code/ahmed010abdo178/gpt-vit2/notebook
@@ -184,6 +182,8 @@ new_df = new_df.drop(index=range(6000, 6469))
 
 val_df = images_captions_df.copy()
 val_df = val_df.drop(index=range(0, 6000))
+
+
 # print(val_df.head())
 
 
@@ -360,9 +360,9 @@ class ContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 

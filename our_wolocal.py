@@ -6,35 +6,36 @@
 # WANDB_API_KEY=425c813e4ad3283798084d341b069aad7184735b
 """# Set arguments"""
 
-import torch
-from torch import autocast
-import torch.nn as nn
-import torch.nn.parallel
-from health_multimodal.image.model import ImageModel
-from health_multimodal.image.model.types import ImageEncoderType
-from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
-from torch.utils.data import Dataset, DataLoader
-import os
-from health_multimodal.image.data.io import load_image
-from tqdm import tqdm
-
 import argparse
+import json
+import math
+import os
+from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-import math
-import json
-from pathlib import Path
-from datetime import datetime
+import torch
+import torch.nn as nn
+import torch.nn.parallel
+import wandb
+from torch import autocast
+from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import Dataset, DataLoader
+from tqdm import tqdm
+
+from evaluation.shuffled_matching.utils import TextShuffler, pre_caption
+from health_multimodal.image.data.io import load_image
+from health_multimodal.image.data.transforms import (
+    create_chest_xray_transform_for_inference,
+)
+from health_multimodal.image.model import ImageModel
 from health_multimodal.image.model.pretrained import (
     BIOMED_VLP_CXR_BERT_SPECIALIZED,
     CXR_BERT_COMMIT_TAG,
 )
-from health_multimodal.image.data.transforms import (
-    create_chest_xray_transform_for_inference,
-)
-from torch.nn.utils.rnn import pad_sequence
-import wandb
-from evaluation.shuffled_matching.utils import TextShuffler, pre_caption
+from health_multimodal.image.model.types import ImageEncoderType
+from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
 
 # from health_multimodal.image.model.pretrained import get_imagenet_init_encoder
 # from health_multimodal.image.model.resnet import resnet50
@@ -100,7 +101,6 @@ parser.add_argument(
     "--wandb", default=False, action="store_true", help="whether to use wandb"
 )
 
-
 args = parser.parse_args()  # running in command line
 
 # args = parser.parse_args('')  # running in ipynb
@@ -112,15 +112,14 @@ args.schedule = []  # cos in use
 # args.symmetric = False
 if args.results_dir == "":
     args.results_dir = (
-        "./new_caches_v6"
-        + "/shuffle-temp"
-        + str(args.shuffle_temp)
-        + "/cache-"
-        + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
+            "./new_caches_v6"
+            + "/shuffle-temp"
+            + str(args.shuffle_temp)
+            + "/cache-"
+            + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
     )
 
 print(args)
-
 
 # 🐝 1️⃣ Start a new run to track this script
 if args.wandb:
@@ -134,7 +133,6 @@ if args.wandb:
         config=args,
     )
 
-
 """# Dataloader"""
 
 images_captions_df = pd.read_csv(
@@ -144,6 +142,7 @@ images_captions_df = pd.read_csv(
 # import swifter
 new_df = images_captions_df.copy()
 new_df = new_df.drop(index=range(6000, 6469))
+
 
 # val_df = images_captions_df.copy()
 # val_df = val_df.drop(index = range(0,6000))
@@ -339,9 +338,9 @@ class IShuffledContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 

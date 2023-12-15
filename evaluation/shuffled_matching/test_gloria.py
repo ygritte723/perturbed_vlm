@@ -14,11 +14,22 @@ from health_multimodal.image.data.io import load_image
 from health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
-from utils import TextShuffler, pre_caption, ShuffledContrastiveModel
+from utils_wo import TextShuffler, pre_caption, Gloria
 
 batch_size = 64
 lr = 0.0015
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+model = Gloria()
+
+# optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=wd, momentum=0.9)
+# optimizer.load_state_dict(checkpoint['optimizer'])
+pt = "/jet/home/lisun/work/xinliu/gloria/caches/wopretrain/bt12/cache-2023-11-27-02-28-55-moco/model_last.pth"
+checkpoint = torch.load(pt, map_location=device)
+print("checkpoint_path:", pt)
+
+msg = model.load_state_dict(checkpoint["state_dict"], strict=False)
+print(msg)
 """# Dataloader"""
 
 images_captions_df = pd.read_csv(
@@ -140,15 +151,6 @@ test_loader = DataLoader(
     collate_fn=collate_fn,
 )
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = ShuffledContrastiveModel()
-checkpoint = torch.load(
-    "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/new_caches/cache-2023-09-30-06-42-55-moco/model_last.pth",
-    map_location=device,
-)
-model.load_state_dict(checkpoint["state_dict"])
-# optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=wd, momentum=0.9)
-# optimizer.load_state_dict(checkpoint['optimizer'])
 model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))

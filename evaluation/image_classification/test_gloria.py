@@ -16,8 +16,8 @@ class_names = [
 ]
 
 checkpoint_path = (
-    "../../../../../gloria/caches"
-    + "/wopretrain/bt12/cache-2023-11-27-02-28-55-moco/model_last.pth"
+        "../../../../../gloria/caches"
+        + "/wopretrain/bt12/cache-2023-11-27-02-28-55-moco/model_last.pth"
 )
 
 pathFileTrain = "/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/train_mod1.csv"
@@ -31,7 +31,6 @@ ac_fn = "output/wopretrain/bt12/gloria_test_accuracies.txt"
 logging.basicConfig(
     filename=log_fn, level=logging.INFO, format="%(asctime)s:%(levelname)s:%(message)s"
 )
-
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = Gloria()
@@ -216,7 +215,7 @@ def run():
         train_loss = train_model(model, dataLoaderTrain, optimizer, criterion, device)
         val_loss, val_accuracy = validate_model(model, dataLoaderVal, criterion, device)
 
-        logging.info(f"Epoch {epoch+1}/{num_epochs}")
+        logging.info(f"Epoch {epoch + 1}/{num_epochs}")
         logging.info(f"Training Loss: {train_loss:.4f}")
         logging.info(f"Validation Loss: {val_loss:.4f}")
         for task_name, acc in zip(class_names, val_accuracy):

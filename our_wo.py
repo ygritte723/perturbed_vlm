@@ -105,7 +105,6 @@ parser.add_argument(
     "--wandb", default=False, action="store_true", help="whether to use wandb"
 )
 
-
 args = parser.parse_args()  # running in command line
 
 # args = parser.parse_args('')  # running in ipynb
@@ -117,17 +116,17 @@ args.schedule = []  # cos in use
 # args.symmetric = False
 if args.results_dir == "":
     args.results_dir = (
-        "./new_caches_v8"
-        + "/T"
-        + str(args.loss_t)
-        + "_L"
-        + str(args.loss_l)
-        + "_shuffle-temp"
-        + str(args.shuffle_temp)
-        + "/bt"
-        + str(args.batch_size)
-        + "/cache-"
-        + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
+            "./new_caches_v8"
+            + "/T"
+            + str(args.loss_t)
+            + "_L"
+            + str(args.loss_l)
+            + "_shuffle-temp"
+            + str(args.shuffle_temp)
+            + "/bt"
+            + str(args.batch_size)
+            + "/cache-"
+            + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-moco")
     )
 
 isExist = os.path.exists(args.results_dir)
@@ -136,7 +135,6 @@ if not isExist:
     os.makedirs(args.results_dir)
     print("The new directory " + args.results_dir + "' is created!")
 print(args)
-
 
 # 🐝 1️⃣ Start a new run to track this script
 if args.wandb:
@@ -150,7 +148,6 @@ if args.wandb:
         config=args,
     )
 
-
 """# Dataloader"""
 
 images_captions_df = pd.read_csv(
@@ -160,6 +157,7 @@ images_captions_df = pd.read_csv(
 # import swifter
 new_df = images_captions_df.copy()
 new_df = new_df.drop(index=range(6000, 6469))
+
 
 # val_df = images_captions_df.copy()
 # val_df = val_df.drop(index = range(0,6000))
@@ -385,14 +383,14 @@ class Identity(nn.Module):
 
 class IShuffledContrastiveModel(nn.Module):
     def __init__(
-        self,
-        T=0.5,
-        shuffle_temp=0.07,
-        L=0.5,
-        last_n_layer=4,
-        local_temp1=4.0,
-        local_temp2=5.0,
-        local_temp3=10.0,
+            self,
+            T=0.5,
+            shuffle_temp=0.07,
+            L=0.5,
+            last_n_layer=4,
+            local_temp1=4.0,
+            local_temp2=5.0,
+            local_temp3=10.0,
     ):
         super(IShuffledContrastiveModel, self).__init__()
 
@@ -476,9 +474,9 @@ class IShuffledContrastiveModel(nn.Module):
         )
         # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-            self.criterion(logits_text_per_image, target)
-            + self.criterion(logits_image_per_text, target)
-        ) / 2
+                       self.criterion(logits_text_per_image, target)
+                       + self.criterion(logits_image_per_text, target)
+               ) / 2
 
         return loss
 
@@ -593,15 +591,15 @@ class IShuffledContrastiveModel(nn.Module):
         return local_features
 
     def local_loss(
-        self,
-        input_ids,
-        attention_mask,
-        token_type_ids,
-        cap_lens,
-        image_input,
-        temp1=4.0,
-        temp2=5.0,
-        temp3=10.0,
+            self,
+            input_ids,
+            attention_mask,
+            token_type_ids,
+            cap_lens,
+            image_input,
+            temp1=4.0,
+            temp2=5.0,
+            temp3=10.0,
     ):
         # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = image_input.shape[0]
@@ -609,12 +607,12 @@ class IShuffledContrastiveModel(nn.Module):
         # local_image_embeds = self.local_image_encoder(image_input, return_intermediate_layers=True)[3]
         local_image_embeds = self.resnet_forward(image_input)
         if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-            torch.isinf(local_image_embeds)
+                torch.isinf(local_image_embeds)
         ):
             print("NaN or Inf in image_input after encoder")
         local_image_embeds = self.local_embedder(local_image_embeds)
         if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-            torch.isinf(local_image_embeds)
+                torch.isinf(local_image_embeds)
         ):
             print("NaN or Inf in local_image_embeds after embedder")
 
@@ -630,7 +628,7 @@ class IShuffledContrastiveModel(nn.Module):
         # print(len(all_embeddings))
         # (batch_size, sequence_length, hidden_size)
         embeddings = torch.stack(
-            all_embeddings[-self.last_n_layer :]
+            all_embeddings[-self.last_n_layer:]
         )  # layers, batch, sent_len, embedding size
 
         embeddings = embeddings.permute(1, 0, 2, 3)
@@ -644,10 +642,10 @@ class IShuffledContrastiveModel(nn.Module):
         word_embeddings = word_embeddings.view(batch_dim, num_words, 768)
         word_embeddings = word_embeddings.permute(0, 2, 1)
         word_embeddings = word_embeddings / (
-            torch.norm(word_embeddings, 2, dim=1, keepdim=True).expand_as(
-                word_embeddings
-            )
-            + 1e-6
+                torch.norm(word_embeddings, 2, dim=1, keepdim=True).expand_as(
+                    word_embeddings
+                )
+                + 1e-6
         )
         words_emb = word_embeddings
 

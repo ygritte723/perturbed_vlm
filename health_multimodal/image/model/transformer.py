@@ -35,12 +35,12 @@ class VisionTransformerPooler(nn.Module):
     """
 
     def __init__(
-        self,
-        input_dim: int,
-        grid_shape: Tuple[int, int],
-        num_heads: int = 8,
-        num_blocks: int = 3,
-        norm_layer: Any = partial(nn.LayerNorm, eps=1e-6),
+            self,
+            input_dim: int,
+            grid_shape: Tuple[int, int],
+            num_heads: int = 8,
+            num_blocks: int = 3,
+            norm_layer: Any = partial(nn.LayerNorm, eps=1e-6),
     ):
         super().__init__()
 
@@ -82,17 +82,17 @@ class VisionTransformerPooler(nn.Module):
         return {"type_embed"}
 
     def forward(
-        self, current_image: torch.Tensor, previous_image: Optional[torch.Tensor] = None
+            self, current_image: torch.Tensor, previous_image: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         B, C, H, W = current_image.shape
         assert (
-            H == self.grid_shape[0] and W == self.grid_shape[1]
+                H == self.grid_shape[0] and W == self.grid_shape[1]
         ), "Input and grid shapes do not match"
 
         # Flatten patch embeddings to have shape (B x L x C), L = H * W
         if previous_image is not None:
             assert (
-                previous_image.shape == current_image.shape
+                    previous_image.shape == current_image.shape
             ), "current_image and previous_image shapes do not match"
             previous_image = previous_image.view(B, C, H * W).transpose(1, 2)
         current_image = current_image.view(B, C, H * W).transpose(1, 2)
@@ -106,17 +106,17 @@ class VisionTransformerPooler(nn.Module):
         # Extract the patch features of current image
         cur_img_token_id = 0
         current_token_features = token_features[
-            :, cur_img_token_id : self.num_patches + cur_img_token_id
-        ]
+                                 :, cur_img_token_id: self.num_patches + cur_img_token_id
+                                 ]
         current_patch_features = current_token_features.transpose(1, 2).view(B, C, H, W)
 
         return current_patch_features
 
     def forward_after_reshape(
-        self,
-        x: torch.Tensor,
-        pos_embed: torch.Tensor,
-        x_previous: Optional[torch.Tensor] = None,
+            self,
+            x: torch.Tensor,
+            pos_embed: torch.Tensor,
+            x_previous: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         B, L, _ = x.shape  # Batch, Sequence length, Feature dimension
 
@@ -163,20 +163,20 @@ class MultiHeadAttentionLayer(nn.Module):
     """
 
     def __init__(
-        self,
-        dim: int,
-        num_heads: int = 8,
-        qkv_bias: bool = False,
-        attn_drop: float = 0.0,
-        proj_drop: float = 0.0,
+            self,
+            dim: int,
+            num_heads: int = 8,
+            qkv_bias: bool = False,
+            attn_drop: float = 0.0,
+            proj_drop: float = 0.0,
     ) -> None:
         super().__init__()
         self.num_heads = num_heads
         assert (
-            dim % num_heads == 0
+                dim % num_heads == 0
         ), f"The embedding dim ({dim}) must be divisible by the number of heads ({num_heads})"
         head_dim = dim // num_heads
-        self.scale = head_dim**-0.5
+        self.scale = head_dim ** -0.5
         self.return_attention = False
 
         self.proj_q = nn.Linear(dim, dim, bias=qkv_bias)
@@ -188,11 +188,11 @@ class MultiHeadAttentionLayer(nn.Module):
         self.proj_drop = nn.Dropout(proj_drop)
 
     def forward(
-        self, k: torch.Tensor, q: torch.Tensor, v: torch.Tensor
+            self, k: torch.Tensor, q: torch.Tensor, v: torch.Tensor
     ) -> MultiHeadAttentionOutput:
         B, N, C = v.shape
         assert (
-            C % self.num_heads == 0
+                C % self.num_heads == 0
         ), f"The embedding dim ({C}) must be divisible by the number of heads ({self.num_heads})"
 
         w_q = (
@@ -243,16 +243,16 @@ class Block(nn.Module):
     """
 
     def __init__(
-        self,
-        dim: int,
-        num_heads: int,
-        mlp_ratio: float = 1.0,
-        qkv_bias: bool = False,
-        drop: float = 0.0,
-        attn_drop: float = 0.0,
-        drop_path: float = 0.0,
-        act_layer: Callable = nn.GELU,
-        norm_layer: Callable = nn.LayerNorm,
+            self,
+            dim: int,
+            num_heads: int,
+            mlp_ratio: float = 1.0,
+            qkv_bias: bool = False,
+            drop: float = 0.0,
+            attn_drop: float = 0.0,
+            drop_path: float = 0.0,
+            act_layer: Callable = nn.GELU,
+            norm_layer: Callable = nn.LayerNorm,
     ) -> None:
         super().__init__()
         self.norm1 = norm_layer(dim)
@@ -274,13 +274,13 @@ class Block(nn.Module):
         )
 
     def with_pos_and_type_embed(
-        self, tensor: torch.Tensor, emb: Optional[torch.Tensor]
+            self, tensor: torch.Tensor, emb: Optional[torch.Tensor]
     ) -> torch.Tensor:
         # Add positional embeddings to key and query tensors
         return tensor if emb is None else tensor + emb
 
     def forward(
-        self, x: torch.Tensor, pos_and_type_embed: Optional[torch.Tensor]
+            self, x: torch.Tensor, pos_and_type_embed: Optional[torch.Tensor]
     ) -> torch.Tensor:
         x_with_emb = self.with_pos_and_type_embed(self.norm1(x), emb=pos_and_type_embed)
         x = x + self.drop_path(self.attn.forward_as_mhsa(x_with_emb).mha_output)
@@ -296,11 +296,11 @@ class SinePositionEmbedding:
     """
 
     def __init__(
-        self,
-        embedding_dim: int = 64,
-        temperature: int = 10000,
-        normalize: bool = False,
-        scale: Optional[float] = None,
+            self,
+            embedding_dim: int = 64,
+            temperature: int = 10000,
+            normalize: bool = False,
+            scale: Optional[float] = None,
     ) -> None:
         super().__init__()
         self.embedding_dim = embedding_dim
@@ -323,7 +323,7 @@ class SinePositionEmbedding:
 
         dim_t = torch.arange(self.embedding_dim, dtype=torch.float32)
         dim_t = self.temperature ** (
-            2 * torch.div(dim_t, 2, rounding_mode="floor") / self.embedding_dim
+                2 * torch.div(dim_t, 2, rounding_mode="floor") / self.embedding_dim
         )
 
         pos_x = x_embed[:, :, :, None] / dim_t

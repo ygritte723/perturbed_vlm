@@ -55,7 +55,7 @@ class ImageEncoder(nn.Module):
         return encoder
 
     def forward(
-        self, current_image: torch.Tensor, return_patch_embeddings: bool = False
+            self, current_image: torch.Tensor, return_patch_embeddings: bool = False
     ) -> ImageEncoderOutputType:
         """Get image global and patch embeddings"""
 
@@ -69,7 +69,7 @@ class ImageEncoder(nn.Module):
         return avg_pooled_emb
 
     def reload_encoder_with_dilation(
-        self, replace_stride_with_dilation: Optional[Sequence[bool]] = None
+            self, replace_stride_with_dilation: Optional[Sequence[bool]] = None
     ) -> None:
         """Workaround for enabling dilated convolutions after model initialization.
 
@@ -132,10 +132,10 @@ class MultiImageEncoder(ImageEncoder):
         trunc_normal_(self.missing_previous_emb, std=0.02)
 
     def forward(  # type: ignore[override]
-        self,
-        current_image: torch.Tensor,
-        previous_image: Optional[torch.Tensor] = None,
-        return_patch_embeddings: bool = False,
+            self,
+            current_image: torch.Tensor,
+            previous_image: Optional[torch.Tensor] = None,
+            return_patch_embeddings: bool = False,
     ) -> ImageEncoderOutputType:
         batch_size = current_image.shape[0]
 
@@ -165,7 +165,7 @@ class MultiImageEncoder(ImageEncoder):
         return avg_pooled_emb
 
     def reload_encoder_with_dilation(
-        self, replace_stride_with_dilation: Optional[Sequence[bool]] = None
+            self, replace_stride_with_dilation: Optional[Sequence[bool]] = None
     ) -> None:
         raise NotImplementedError
 

@@ -37,7 +37,7 @@ class TextInferenceEngine(TextInput):
         return not self.model.training
 
     def tokenize_input_prompts(
-        self, prompts: Union[str, List[str]], verbose: bool = True
+            self, prompts: Union[str, List[str]], verbose: bool = True
     ) -> Any:
         tokenizer_output = super().tokenize_input_prompts(prompts, verbose=verbose)
         device = next(self.model.parameters()).device
@@ -55,10 +55,10 @@ class TextInferenceEngine(TextInput):
 
     @torch.no_grad()
     def get_embeddings_from_prompt(
-        self,
-        prompts: Union[str, List[str]],
-        normalize: bool = True,
-        verbose: bool = True,
+            self,
+            prompts: Union[str, List[str]],
+            normalize: bool = True,
+            verbose: bool = True,
     ) -> torch.Tensor:
         """Generate L2-normalised embeddings for a list of input text prompts.
 
@@ -80,7 +80,7 @@ class TextInferenceEngine(TextInput):
 
     @torch.no_grad()
     def get_pairwise_similarities(
-        self, prompt_set_1: Union[str, List[str]], prompt_set_2: Union[str, List[str]]
+            self, prompt_set_1: Union[str, List[str]], prompt_set_2: Union[str, List[str]]
     ) -> torch.Tensor:
         """Compute pairwise cosine similarities between the embeddings of the given prompts."""
 
