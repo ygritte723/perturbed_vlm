@@ -1074,7 +1074,7 @@ def get_text_perturb_fn(text_perturb_fn):
         return shuffle_all_words
     elif text_perturb_fn == "shuffle_trigrams":
         return shuffle_trigrams
-   elif text_perturb_fn is None:
+    elif text_perturb_fn is None:
         return None
     else:
         print(

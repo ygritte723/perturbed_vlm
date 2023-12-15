@@ -1,5 +1,0 @@
-Task Cardiomegaly Accuracy: 24.00%
-Task Edema Accuracy: 65.40%
-Task Consolidation Accuracy: 33.80%
-Task Atelectasis Accuracy: 22.40%
-Task Pleural Effusion Accuracy: 77.80%

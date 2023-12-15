@@ -8,8 +8,8 @@ import torch.nn as nn
 import torch.nn.functional as nnf
 from torchvision import transforms as T
 
-from health_multimodal.image.model import ImageModel
-from health_multimodal.text.model import CXRBertModel
+from ...health_multimodal.image.model import ImageModel
+from ...health_multimodal.text.model import CXRBertModel
 
 # A lot of the approaches here are inspired from the wonderful paper from O'Connor and Andreas 2021.
 # https://github.com/lingo-mit/context-ablations

@@ -9,8 +9,8 @@ import torch.nn.functional as nnf
 from torchvision import transforms as T
 from torchvision.models import resnet50
 
-from health_multimodal.image.model import ImageModel
-from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
+from ...health_multimodal.image.model import ImageModel
+from ...health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
 
 # A lot of the approaches here are inspired from the wonderful paper from O'Connor and Andreas 2021.
 # https://github.com/lingo-mit/context-ablations

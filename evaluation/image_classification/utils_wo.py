@@ -7,8 +7,8 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.models import resnet50
 
-from health_multimodal.image.model import ImageModel
-from health_multimodal.text.model import CXRBertModel, CXRBertConfig, CXRBertTokenizer
+from ...health_multimodal.image.model import ImageModel
+from ...health_multimodal.text.model import CXRBertModel, CXRBertConfig, CXRBertTokenizer
 
 
 # A lot of the approaches here are inspired from the wonderful paper from O'Connor and Andreas 2021.

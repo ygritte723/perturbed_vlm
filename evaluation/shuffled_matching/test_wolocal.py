@@ -10,8 +10,8 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from transformers import BertTokenizer
 
-from health_multimodal.image.data.io import load_image
-from health_multimodal.image.data.transforms import (
+from ...health_multimodal.image.data.io import load_image
+from ...health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
 from utils_v4 import TextShuffler, pre_caption, IShuffledContrastiveModel
