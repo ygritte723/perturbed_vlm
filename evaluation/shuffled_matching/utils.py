@@ -138,7 +138,9 @@ class IShuffledContrastiveModel(nn.Module):
 """# Shuffled Contrastive model"""
 
 
+# noinspection PyUnusedLocal
 class ShuffledContrastiveModel(nn.Module):
+    # noinspection PyUnusedLocal
     def __init__(self, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
         super(ShuffledContrastiveModel, self).__init__()
 
@@ -189,6 +191,7 @@ class ShuffledContrastiveModel(nn.Module):
 
         return loss
 
+    # noinspection PyUnusedLocal
     def shuffle_loss(self, input_ids_shuffled, attention_mask_shuffled, image_input):
         # https://jamesmccaffrey.wordpress.com/2022/03/04/contrastive-loss-function-in-pytorch/
 
@@ -294,7 +297,9 @@ class ShuffledContrastiveModel(nn.Module):
         return loss
 
 
+# noinspection PyUnusedLocal
 class ContrastiveModel(nn.Module):
+    # noinspection PyUnusedLocal
     def __init__(self, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
         super(ContrastiveModel, self).__init__()
 

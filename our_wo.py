@@ -6,31 +6,31 @@
 # WANDB_API_KEY=425c813e4ad3283798084d341b069aad7184735b
 """# Set arguments"""
 
+import argparse
+import json
+import math
+import os
+from datetime import datetime
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.parallel
-from health_multimodal.image.model import ImageModel
-from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer, CXRBertConfig
+import wandb
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset, DataLoader
-import os
-from health_multimodal.image.data.io import load_image
+from torchvision.models import resnet50
 from tqdm import tqdm
 
-import argparse
-import numpy as np
-import pandas as pd
-import math
-import json
-from pathlib import Path
-from datetime import datetime
+from evaluation.shuffled_matching.utils import TextShuffler, pre_caption
+from health_multimodal.image.data.io import load_image
 from health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
-from torch.nn.utils.rnn import pad_sequence
-import wandb
-from evaluation.shuffled_matching.utils import TextShuffler, pre_caption
-from torchvision.models import resnet50
-
+from health_multimodal.image.model import ImageModel
+from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer, CXRBertConfig
 
 if torch.cuda.is_available():
     print("You have a GPU")

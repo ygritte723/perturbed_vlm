@@ -40,11 +40,6 @@ from health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
 from health_multimodal.image.model import ImageModel
-from health_multimodal.image.model.pretrained import (
-    BIOMED_VLP_CXR_BERT_SPECIALIZED,
-    CXR_BERT_COMMIT_TAG,
-)
-from health_multimodal.image.model.types import ImageEncoderType
 from health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
 
 # from health_multimodal.image.model.pretrained import get_imagenet_init_encoder
@@ -209,7 +204,7 @@ class OpenIDataset(Dataset):
         self.transform = transform
         self.root_dir = root_dir
         self.tokenizer = CXRBertTokenizer.from_pretrained(
-            BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG
+            "microsoft/BiomedVLP-CXR-BERT-specialized", revision="v1.1"
         )
 
     def __len__(self):
@@ -245,7 +240,6 @@ class OpenIDataset(Dataset):
 # train_dataset = OpenIDataset(
 # new_df,
 # root_dir= "/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized"
-# tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
 # )
 # print(train_dataset[0][0].shape, train_dataset[0][1].shape, train_dataset[0][2])
 # gc.collect()
@@ -263,19 +257,16 @@ transforms = create_chest_xray_transform_for_inference(
 train_dataset = OpenIDataset(
     new_df,
     root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
-    # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
     transform=transforms,
 )
 memory_dataset = OpenIDataset(
     new_df,
     root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
-    # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
     transform=transforms,
 )
 test_dataset = OpenIDataset(
     val_df,
     root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
-    # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
     transform=transforms,
 )
 train_loader = DataLoader(
