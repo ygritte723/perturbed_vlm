@@ -4,7 +4,8 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, ToTensor, CenterCrop
 
-from utils import CheXpertDataSet, GShuffle
+from datasets_utils import CheXpertDataSet
+from utils import GShuffle
 
 trBatchSize = 16
 class_names = [

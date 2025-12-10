@@ -4,7 +4,8 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, ToTensor, CenterCrop
 
-from utils import CheXpertDataSet, IShuffledContrastiveModel
+from datasets_utils import CheXpertDataSet
+from utils import IShuffledContrastiveModel
 
 trBatchSize = 16
 class_names = [
