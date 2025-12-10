@@ -1,4 +1,10 @@
 import logging
+import sys
+import os
+
+# Add project root to sys.path to allow importing config
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+import config
 
 import torch
 from torch.utils.data import DataLoader
@@ -15,11 +21,11 @@ class_names = [
     "Pleural Effusion",
 ]
 
-checkpoint_path = "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/caches-wopretrain/bt64/cache-2023-11-27-22-06-16-moco/model_last.pth"
+checkpoint_path = config.CHECKPOINT_PATH
 
-pathFileTrain = "/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/train_mod1.csv"
-pathFileValid = "/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/valid_mod.csv"
-pathFileTest = "/jet/home/lisun/work/xinliu/images/CheXpert-v1.0-small/test_mod.csv"
+pathFileTrain = config.CHEXPERT_TRAIN_CSV
+pathFileValid = config.CHEXPERT_VALID_CSV
+pathFileTest = config.CHEXPERT_TEST_CSV
 
 log_fn = "output/wopretrain/bt64/old_training_log.txt"
 result_fn = "output/wopretrain/bt64/old_test_results.csv"

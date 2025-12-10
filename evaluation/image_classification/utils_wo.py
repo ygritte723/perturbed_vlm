@@ -1,4 +1,6 @@
 import csv
+import os
+import config
 
 import numpy as np
 import torch
@@ -7,8 +9,8 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.models import resnet50
 
-from ...health_multimodal.image.model import ImageModel
-from ...health_multimodal.text.model import CXRBertModel, CXRBertConfig, CXRBertTokenizer
+from health_multimodal.image.model import ImageModel
+from health_multimodal.text.model import CXRBertModel, CXRBertConfig, CXRBertTokenizer
 
 
 # A lot of the approaches here are inspired from the wonderful paper from O'Connor and Andreas 2021.
@@ -88,7 +90,7 @@ class CheXpertDataSet(Dataset):
     def __getitem__(self, index):
         """Take the index of item and returns the image and its labels"""
         image_name = self.image_names[index]
-        image_name = "/jet/home/lisun/work/xinliu/images/" + image_name
+        image_name = os.path.join(config.IMAGES_ROOT, image_name)
         image = Image.open(image_name).convert("RGB")
         label = self.labels[index]
         if self.transform is not None:

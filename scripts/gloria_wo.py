@@ -3,6 +3,12 @@ import json
 # import wandb
 import math
 import os
+import sys
+
+# Add project root to sys.path to allow importing config
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import config
+
 from datetime import datetime
 from pathlib import Path
 
@@ -118,7 +124,7 @@ print(args)
 """# Dataloader"""
 
 images_captions_df = pd.read_csv(
-    "/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_captions.csv"
+    config.INDIANA_CAPTIONS_CSV
 )
 
 new_df = images_captions_df.copy()
@@ -237,19 +243,19 @@ transforms = create_chest_xray_transform_for_inference(
 
 train_dataset = OpenIDataset(
     new_df,
-    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    root_dir=config.INDIANA_IMAGES_NORMALIZED,
     # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
     transform=transforms,
 )
 memory_dataset = OpenIDataset(
     new_df,
-    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    root_dir=config.INDIANA_IMAGES_NORMALIZED,
     # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
     transform=transforms,
 )
 test_dataset = OpenIDataset(
     val_df,
-    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    root_dir=config.INDIANA_IMAGES_NORMALIZED,
     # tokenizer=CXRBertTokenizer.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG),
     transform=transforms,
 )

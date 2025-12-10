@@ -1,4 +1,10 @@
 import os
+import sys
+
+# Add project root to sys.path to allow importing config
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+import config
+
 from pathlib import Path
 
 import numpy as np
@@ -10,8 +16,8 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from transformers import BertTokenizer
 
-from ...health_multimodal.image.data.io import load_image
-from ...health_multimodal.image.data.transforms import (
+from health_multimodal.image.data.io import load_image
+from health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
 from utils_wo import TextShuffler, pre_caption, Gloria
@@ -24,7 +30,7 @@ model = Gloria()
 
 # optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=wd, momentum=0.9)
 # optimizer.load_state_dict(checkpoint['optimizer'])
-pt = "/jet/home/lisun/work/xinliu/gloria/caches/wopretrain/bt12/cache-2023-11-27-02-28-55-moco/model_last.pth"
+pt = config.CHECKPOINT_PATH_GLORIA
 checkpoint = torch.load(pt, map_location=device)
 print("checkpoint_path:", pt)
 
@@ -33,7 +39,7 @@ print(msg)
 """# Dataloader"""
 
 images_captions_df = pd.read_csv(
-    "/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_captions.csv"
+    config.INDIANA_CAPTIONS_CSV
 )
 
 val_df = images_captions_df.copy()
@@ -110,7 +116,7 @@ class ShuffledOpenIDataset(Dataset):
 
 test_dataset = ShuffledOpenIDataset(
     val_df,
-    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    root_dir=config.INDIANA_IMAGES_NORMALIZED,
     transform=transforms,
 )
 

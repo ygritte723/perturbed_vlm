@@ -1,4 +1,10 @@
 import os
+import sys
+
+# Add project root to sys.path to allow importing config
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+import config
+
 from pathlib import Path
 
 import numpy as np
@@ -10,8 +16,8 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from transformers import BertTokenizer
 
-from ...health_multimodal.image.data.io import load_image
-from ...health_multimodal.image.data.transforms import (
+from health_multimodal.image.data.io import load_image
+from health_multimodal.image.data.transforms import (
     create_chest_xray_transform_for_inference,
 )
 from utils_v4 import TextShuffler, pre_caption, GShuffle
@@ -24,10 +30,7 @@ model = GShuffle()
 
 # optimizer = torch.optim.SGD(model.parameters(), lr=lr, weight_decay=wd, momentum=0.9)
 # optimizer.load_state_dict(checkpoint['optimizer'])
-pt = (
-        "/jet/home/lisun/work/xinliu/hi-ml/hi-ml-multimodal/src/"
-        + "new_caches_v7/T0.1_L0.1_shuffle-temp0.01/cache-2023-11-27-06-06-56-moco/model_last.pth"
-)
+pt = config.CHECKPOINT_PATH_OUR
 checkpoint = torch.load(pt, map_location=device)
 print("checkpoint_path:", pt)
 
@@ -36,7 +39,7 @@ print(msg)
 """# Dataloader"""
 
 images_captions_df = pd.read_csv(
-    "/ocean/projects/asc170022p/lisun/xinliu/images/csv/indiana_captions.csv"
+    config.INDIANA_CAPTIONS_CSV
 )
 
 val_df = images_captions_df.copy()
@@ -48,6 +51,13 @@ transforms = create_chest_xray_transform_for_inference(resize=256, center_crop_s
 
 class ShuffledOpenIDataset(Dataset):
     def __init__(self, df, root_dir, transform=None, max_words=50):
+        self.df = df
+        self.test_cases = []
+        self.transform = transform
+        self.root_dir = root_dir
+        self.tokenizer = BertTokenizer.from_pretrained(
+            "microsoft/BiomedVLP-CXR-BERT-specialized"
+        )
         self.df = df
         self.test_cases = []
         self.transform = transform
@@ -113,7 +123,7 @@ class ShuffledOpenIDataset(Dataset):
 
 test_dataset = ShuffledOpenIDataset(
     val_df,
-    root_dir="/ocean/projects/asc170022p/lisun/xinliu/images/images_normalized",
+    root_dir=config.INDIANA_IMAGES_NORMALIZED,
     transform=transforms,
 )
 
