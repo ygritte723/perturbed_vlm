@@ -4,7 +4,7 @@
 
 The approach enhances vision-language models by introducing text perturbations as negative samples and localized
 attention representation for improving granularity level of understanding in biomedical applications.
-<img src="readme/Per_arch.png" alt="Per_arch" title="Per_arch" width="700"/>
+<img src="assets/Per_arch.png" alt="Per_arch" title="Per_arch" width="700"/>
 
 ## Methodology
 
