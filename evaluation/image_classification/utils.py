@@ -1,10 +1,6 @@
-import csv
-
 import numpy as np
 import torch
 import torch.nn as nn
-from PIL import Image
-from torch.utils.data import Dataset
 from torchvision.models import resnet50
 
 from ...health_multimodal.image.model import ImageModel
