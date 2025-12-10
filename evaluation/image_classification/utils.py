@@ -1,21 +1,11 @@
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
 from torchvision.models import resnet50
 
-from ...health_multimodal.image.model import ImageModel
-from ...health_multimodal.text.model import CXRBertModel, CXRBertTokenizer
-
-
-# A lot of the approaches here are inspired from the wonderful paper from O'Connor and Andreas 2021.
-# https://github.com/lingo-mit/context-ablations
-#  -------------------------------------------------------------------------------------------
-#  Copyright (c) Microsoft Corporation. All rights reserved.
-#  Licensed under the MIT License (MIT). See LICENSE in the repo root for license information.
-#  -------------------------------------------------------------------------------------------
-
-
-"""# Identical Shuffled Contrastive model"""
+from health_multimodal.image.model import ImageModel
+from health_multimodal.text.model import CXRBertModel, CXRBertConfig, CXRBertTokenizer
 
 
 class IShuffledContrastiveModel(nn.Module):
@@ -43,7 +33,6 @@ class IShuffledContrastiveModel(nn.Module):
         )
 
     def contrastive_loss(self, input_ids, attention_mask, image_input):
-        # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = input_ids.shape[0]
 
         # Text encoding
@@ -63,19 +52,17 @@ class IShuffledContrastiveModel(nn.Module):
         target = (
             torch.arange(batch_size).long().to(text_embeds.device, non_blocking=True)
         )
-        # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
+        
         loss = (
-                       self.criterion(logits_text_per_image, target)
-                       + self.criterion(logits_image_per_text, target)
-               ) / 2
+            self.criterion(logits_text_per_image, target)
+            + self.criterion(logits_image_per_text, target)
+        ) / 2
 
         return loss
 
     def shuffle_loss(self, input_ids_shuffled, attention_mask_shuffled, image_input):
         batch_size = len(input_ids_shuffled[0])
         num_text = len(input_ids_shuffled)
-        # print("batch_size: ",batch_size)
-        # print("num_text: ",num_text)
 
         image_embeds = self.image_encoder(image_input).projected_global_embedding
         image_embeds = nn.functional.normalize(image_embeds, dim=1)
@@ -99,43 +86,30 @@ class IShuffledContrastiveModel(nn.Module):
             logits_i = self.logit_scale_shuffle.exp() * image_embeds * text_embeds
             logits.append(torch.sum(logits_i, dim=1)[:, None])
 
-        logits = torch.concatenate(logits, 1)
+        logits = torch.cat(logits, 1)
         # Compute the cross-entropy loss
-        targets = torch.zeros(batch_size, dtype=torch.long).to(
-            image_embeds.device
-        )  # the original text is always at index 0
+        targets = torch.zeros(batch_size, dtype=torch.long).to(image_embeds.device)
         loss = self.criterion(logits, targets)
 
         return loss
 
     def forward(self, input_ids, attention_mask, image_input):
-        # transpose
-        # input_ids = torch.transpose(input_ids, 0, 1)
-        # attention_mask = torch.transpose(attention_mask, 0, 1)
-        # input_ids = np.array(input_ids).T.tolist()
-        # attention_mask = np.array(attention_mask).T.tolist()
         device = torch.device("cuda")
         input_ids = [i.to(device) for i in input_ids]
         attention_mask = [a.to(device) for a in attention_mask]
 
         shuffle_loss = self.shuffle_loss(input_ids, attention_mask, image_input)
-        # print("shuffle_loss: ", shuffle_loss)
         contrastive_loss = self.contrastive_loss(
             pad_sequence(input_ids[0], batch_first=True),
             pad_sequence(attention_mask[0], batch_first=True),
             image_input,
         )
-        # print("contrastive_loss: ", contrastive_loss)
 
         loss = contrastive_loss + self.T * shuffle_loss
-        # print("total_loss: ", loss)
-
         return loss
 
 
-# noinspection PyUnusedLocal
 class ContrastiveModel(nn.Module):
-    # noinspection PyUnusedLocal
     def __init__(self, dim=128, K=65536, m=0.999, T=0.07, mlp=False):
         super(ContrastiveModel, self).__init__()
 
@@ -156,7 +130,6 @@ class ContrastiveModel(nn.Module):
         self.logit_scale = nn.Parameter(torch.ones([]) * np.log(1 / 0.07))
 
     def contrastive_loss(self, input_ids, attention_mask, image_input):
-        # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = input_ids.shape[0]
 
         # Text encoding
@@ -176,11 +149,10 @@ class ContrastiveModel(nn.Module):
         target = (
             torch.arange(batch_size).long().to(text_embeds.device, non_blocking=True)
         )
-        # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-                       self.criterion(logits_text_per_image, target)
-                       + self.criterion(logits_image_per_text, target)
-               ) / 2
+            self.criterion(logits_text_per_image, target)
+            + self.criterion(logits_image_per_text, target)
+        ) / 2
 
         return loss
 
@@ -256,8 +228,7 @@ class Gloria(nn.Module):
         self.local_temp1 = local_temp1
         self.local_temp2 = local_temp2
         self.local_temp3 = local_temp3
-        self.last_n_layer = last_n_layer  # Text Encoder CXRBert
-        # self.text_encoder = CXRBertModel.from_pretrained(BIOMED_VLP_CXR_BERT_SPECIALIZED, revision=CXR_BERT_COMMIT_TAG)
+        self.last_n_layer = last_n_layer 
         self.text_encoder = CXRBertModel.from_pretrained(
             "microsoft/BiomedVLP-CXR-BERT-specialized", revision="v1.1"
         )
@@ -279,9 +250,6 @@ class Gloria(nn.Module):
             bias=False,
         )
 
-        # self.local_text_encoder = AutoModel.from_pretrained("emilyalsentzer/Bio_ClinicalBERT", output_hidden_states=True)
-        # self.local_text_encoder = self.text_encoder
-        # self.idxtoword = {v: k for k, v in AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT").get_vocab().items()}
         self.idxtoword = {
             v: k
             for k, v in CXRBertTokenizer.from_pretrained(
@@ -368,7 +336,6 @@ class Gloria(nn.Module):
         return local_features
 
     def contrastive_loss(self, input_ids, attention_mask, image_input):
-        # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = input_ids.shape[0]
 
         # Text encoding
@@ -388,12 +355,10 @@ class Gloria(nn.Module):
         target = (
             torch.arange(batch_size).long().to(text_embeds.device, non_blocking=True)
         )
-        # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
         loss = (
-                       self.criterion(logits_text_per_image, target)
-                       + self.criterion(logits_image_per_text, target)
-               ) / 2
-        # print('global loss: ', str(loss))
+            self.criterion(logits_text_per_image, target)
+            + self.criterion(logits_image_per_text, target)
+        ) / 2
         return loss
 
     def local_loss(
@@ -407,32 +372,19 @@ class Gloria(nn.Module):
             temp2=5.0,
             temp3=10.0,
     ):
-        # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = image_input.shape[0]
 
-        # local_image_embeds = self.local_image_encoder(image_input, return_intermediate_layers=True)[3]
         local_image_embeds = self.resnet_forward(image_input)
-        if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-                torch.isinf(local_image_embeds)
-        ):
-            print("NaN or Inf in image_input after encoder")
         local_image_embeds = self.local_embedder(local_image_embeds)
-        if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-                torch.isinf(local_image_embeds)
-        ):
-            print("NaN or Inf in local_image_embeds after embedder")
 
-        # text_outputs = self.local_text_encoder(input_ids=input_ids,
         text_outputs = self.text_encoder(
             input_ids=input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
-            # return_dict=True,
             output_hidden_states=True,
         )
         all_embeddings = text_outputs[3]
-        # print(len(all_embeddings))
-        # (batch_size, sequence_length, hidden_size)
+
         embeddings = torch.stack(
             all_embeddings[-self.last_n_layer:]
         )  # layers, batch, sent_len, embedding size
@@ -456,56 +408,43 @@ class Gloria(nn.Module):
         words_emb = word_embeddings
 
         similarities = []
-        # cap_lens = cap_lens.data.tolist()
         for i in range(words_emb.shape[0]):
-            # Get the i-th text description
-            words_num = cap_lens[i]  # 25
-            # TODO: remove [SEP]
-            # word = words_emb[i, :, 1:words_num+1].unsqueeze(0).contiguous()    # [1, 768, 25]
+            words_num = cap_lens[i]  
             word = words_emb[i, :, :words_num].unsqueeze(0).contiguous()  # [1, 768, 25]
             word = word.repeat(batch_size, 1, 1)  # [48, 768, 25]
-            # print(word.shape)
+            
             context = local_image_embeds  # [48, 768, 19, 19]
-            # print(context.shape)
-            # print("context: ", str(context.shape))
-            # print("word: ", str(word.shape))
-            # print("Attn: ", str(attn))
-            # print("word: ", str(word))
+            
             weiContext, attn = attention_fn(
                 word, context, temp1
-            )  # [48, 768, 25], [48, 25, 19, 19]
-            # print("weiContext: ", str(weiContext.shape))
-            # print("Attn: ", str(attn.shape))
+            ) 
 
-            word = word.transpose(1, 2).contiguous()  # [48, 25, 768]
-            weiContext = weiContext.transpose(1, 2).contiguous()  # [48, 25, 768]
+            word = word.transpose(1, 2).contiguous() 
+            weiContext = weiContext.transpose(1, 2).contiguous() 
 
-            word = word.view(batch_size * words_num, -1)  # [1200, 768]
-            weiContext = weiContext.view(batch_size * words_num, -1)  # [1200, 768]
+            word = word.view(batch_size * words_num, -1) 
+            weiContext = weiContext.view(batch_size * words_num, -1) 
 
             row_sim = cosine_similarity(word, weiContext)
-            row_sim = row_sim.view(batch_size, words_num)  # [48, 25]
+            row_sim = row_sim.view(batch_size, words_num) 
 
             row_sim.mul_(temp2).exp_()
-            row_sim = row_sim.sum(dim=1, keepdim=True)  # [48, 1]
+            row_sim = row_sim.sum(dim=1, keepdim=True) 
             row_sim = torch.log(row_sim)
             similarities.append(row_sim)
 
-        similarities = torch.cat(similarities, 1)  #
+        similarities = torch.cat(similarities, 1) 
         similarities = similarities * temp3
-        similarities1 = similarities.transpose(0, 1)  # [48, 48]
-        # print('Similarity: ', str(similarities))
-        # print('Similarity1: ', str(similarities1))
+        similarities1 = similarities.transpose(0, 1) 
+        
         labels = (
             torch.arange(batch_size).long().to(similarities.device, non_blocking=True)
         )
 
-        loss0 = self.criterion(similarities, labels)  # labels: arange(batch_size)
+        loss0 = self.criterion(similarities, labels) 
         loss1 = self.criterion(similarities1, labels)
 
         loss = loss0 + loss1 / 2
-        # print('local loss: ', str(loss))
-
         return loss
 
     def forward(self, input_ids, attention_mask, token_type_ids, cap_lens, image_input):
@@ -537,10 +476,6 @@ class GShuffle(nn.Module):
         self.local_temp2 = local_temp2
         self.local_temp3 = local_temp3
         self.last_n_layer = last_n_layer
-
-        # print("T: ", T)
-        # print("L: ", L)
-        # print("shuffle_temp: ", shuffle_temp)
 
         # Text Encoder CXRBert
         self.text_encoder = CXRBertModel.from_pretrained(
@@ -582,7 +517,6 @@ class GShuffle(nn.Module):
         self.criterion = nn.CrossEntropyLoss()
 
     def contrastive_loss(self, input_ids, attention_mask, image_input):
-        # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = input_ids.shape[0]
 
         # Text encoding
@@ -602,19 +536,17 @@ class GShuffle(nn.Module):
         target = (
             torch.arange(batch_size).long().to(text_embeds.device, non_blocking=True)
         )
-        # print(text_embeds.device, image_embeds.device, self.device, logits_text_per_image.device)
+        
         loss = (
-                       self.criterion(logits_text_per_image, target)
-                       + self.criterion(logits_image_per_text, target)
-               ) / 2
+            self.criterion(logits_text_per_image, target)
+            + self.criterion(logits_image_per_text, target)
+        ) / 2
 
         return loss
 
     def shuffle_loss(self, input_ids_shuffled, attention_mask_shuffled, image_input):
         batch_size = len(input_ids_shuffled[0])
         num_text = len(input_ids_shuffled)
-        # print("batch_size: ",batch_size)
-        # print("num_text: ",num_text)
 
         image_embeds = self.image_encoder(image_input).projected_global_embedding
         image_embeds = nn.functional.normalize(image_embeds, dim=1)
@@ -640,9 +572,7 @@ class GShuffle(nn.Module):
 
         logits = torch.cat(logits, 1)
         # Compute the cross-entropy loss
-        targets = torch.zeros(batch_size, dtype=torch.long).to(
-            image_embeds.device
-        )  # the original text is always at index 0
+        targets = torch.zeros(batch_size, dtype=torch.long).to(image_embeds.device)
         loss = self.criterion(logits, targets)
 
         return loss
@@ -731,32 +661,19 @@ class GShuffle(nn.Module):
             temp2=5.0,
             temp3=10.0,
     ):
-        # print('image_input:', image_input.shape, image_input.min(), image_input.max())
         batch_size = image_input.shape[0]
 
-        # local_image_embeds = self.local_image_encoder(image_input, return_intermediate_layers=True)[3]
         local_image_embeds = self.resnet_forward(image_input)
-        if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-                torch.isinf(local_image_embeds)
-        ):
-            print("NaN or Inf in image_input after encoder")
         local_image_embeds = self.local_embedder(local_image_embeds)
-        if torch.any(torch.isnan(local_image_embeds)) or torch.any(
-                torch.isinf(local_image_embeds)
-        ):
-            print("NaN or Inf in local_image_embeds after embedder")
 
-        # text_outputs = self.local_text_encoder(input_ids=input_ids,
         text_outputs = self.text_encoder(
             input_ids=input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
-            # return_dict=True,
             output_hidden_states=True,
         )
         all_embeddings = text_outputs[3]
-        # print(len(all_embeddings))
-        # (batch_size, sequence_length, hidden_size)
+
         embeddings = torch.stack(
             all_embeddings[-self.last_n_layer:]
         )  # layers, batch, sent_len, embedding size
@@ -780,76 +697,58 @@ class GShuffle(nn.Module):
         words_emb = word_embeddings
 
         similarities = []
-        # cap_lens = cap_lens.data.tolist()
         for i in range(words_emb.shape[0]):
-            # Get the i-th text description
-            words_num = cap_lens[i]  # 25
-            # TODO: remove [SEP]
-            # word = words_emb[i, :, 1:words_num+1].unsqueeze(0).contiguous()    # [1, 768, 25]
+            words_num = cap_lens[i] 
             word = words_emb[i, :, :words_num].unsqueeze(0).contiguous()  # [1, 768, 25]
             word = word.repeat(batch_size, 1, 1)  # [48, 768, 25]
-            # print(word.shape)
-            context = local_image_embeds  # [48, 768, 19, 19]
-            # print(context.shape)
-            # print("context: ", str(context.shape))
-            # print("word: ", str(word.shape))
-            # print("Attn: ", str(attn))
-            # print("word: ", str(word))
+            
+            context = local_image_embeds 
+            
             weiContext, attn = attention_fn(
                 word, context, temp1
-            )  # [48, 768, 25], [48, 25, 19, 19]
-            # print("weiContext: ", str(weiContext.shape))
-            # print("Attn: ", str(attn.shape))
+            ) 
 
-            word = word.transpose(1, 2).contiguous()  # [48, 25, 768]
-            weiContext = weiContext.transpose(1, 2).contiguous()  # [48, 25, 768]
+            word = word.transpose(1, 2).contiguous() 
+            weiContext = weiContext.transpose(1, 2).contiguous() 
 
-            word = word.view(batch_size * words_num, -1)  # [1200, 768]
-            weiContext = weiContext.view(batch_size * words_num, -1)  # [1200, 768]
+            word = word.view(batch_size * words_num, -1) 
+            weiContext = weiContext.view(batch_size * words_num, -1) 
 
             row_sim = cosine_similarity(word, weiContext)
-            row_sim = row_sim.view(batch_size, words_num)  # [48, 25]
+            row_sim = row_sim.view(batch_size, words_num) 
 
             row_sim.mul_(temp2).exp_()
-            row_sim = row_sim.sum(dim=1, keepdim=True)  # [48, 1]
+            row_sim = row_sim.sum(dim=1, keepdim=True) 
             row_sim = torch.log(row_sim)
             similarities.append(row_sim)
 
-        similarities = torch.cat(similarities, 1)  #
+        similarities = torch.cat(similarities, 1) 
         similarities = similarities * temp3
-        similarities1 = similarities.transpose(0, 1)  # [48, 48]
-        # print('Similarity: ', str(similarities))
-        # print('Similarity1: ', str(similarities1))
+        similarities1 = similarities.transpose(0, 1) 
+        
         labels = (
             torch.arange(batch_size).long().to(similarities.device, non_blocking=True)
         )
 
-        loss0 = self.criterion(similarities, labels)  # labels: arange(batch_size)
+        loss0 = self.criterion(similarities, labels) 
         loss1 = self.criterion(similarities1, labels)
 
         loss = loss0 + loss1 / 2
-        # print('local loss: ', str(loss))
 
         return loss
 
     def forward(self, input_ids, attention_mask, token_type_ids, cap_lens, image_input):
         # transpose
-        # input_ids = torch.transpose(input_ids, 0, 1)
-        # attention_mask = torch.transpose(attention_mask, 0, 1)
-        # input_ids = np.array(input_ids).T.tolist()
-        # attention_mask = np.array(attention_mask).T.tolist()
         device = torch.device("cuda")
         input_ids = [i.to(device) for i in input_ids]
         attention_mask = [a.to(device) for a in attention_mask]
 
         shuffle_loss = self.shuffle_loss(input_ids, attention_mask, image_input)
-        # print("shuffle_loss: ", shuffle_loss)
         contrastive_loss = self.contrastive_loss(
             pad_sequence(input_ids[0], batch_first=True),
             pad_sequence(attention_mask[0], batch_first=True),
             image_input,
         )
-        # print("contrastive_loss: ", contrastive_loss)
         loss_l = self.local_loss(
             pad_sequence(input_ids[0], batch_first=True),
             pad_sequence(attention_mask[0], batch_first=True),
@@ -859,6 +758,5 @@ class GShuffle(nn.Module):
         )
 
         loss = contrastive_loss + self.T * shuffle_loss + self.L * loss_l
-        # print("total_loss: ", loss)
 
         return loss
